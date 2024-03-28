@@ -1,0 +1,22 @@
+[package]
+name = "arrow_convert_derive"
+version = "0.6.0"
+authors = [
+    "Swoorup Joshi <swoorupj@gmail.com>",
+    "Jorge Leitao <jorgecarleitao@gmail.com>",
+    "Chandra Penke <chandrapenke@gmail.com>"
+]
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+keywords = ["Arrow", "arrow"]
+repository = "https://github.com/Swoorup/arrow-convert"
+description = "Proc macros for arrow_convert"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1", features=["full"] }
+quote = "1"
+proc-macro2 = "1"
+proc-macro-error = { version = "1" }

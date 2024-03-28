@@ -1,0 +1,36 @@
+[package]
+name = "arrow_convert"
+version = "0.6.0"
+authors = [
+  "Swoorup Joshi <swoorupj@gmail.com>",
+  "Jorge Leitao <jorgecarleitao@gmail.com>",
+  "Chandra Penke <chandrapenke@gmail.com>",
+]
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+keywords = ["Arrow", "arrow"]
+repository = "https://github.com/Swoorup/arrow-convert"
+description = "Convert between nested rust types and Arrow with arrow"
+
+[dependencies]
+arrow = "51.0"
+arrow_convert_derive = { version = "0.6.0", path = "../arrow_convert_derive", optional = true }
+half = { version = "2.1", default-features = false }
+chrono = { version = "0.4", default_features = false, features = ["std"] }
+err-derive = "0.3"
+
+[dev-dependencies]
+arrow_convert_derive = { version = "0.6.0", path = "../arrow_convert_derive" }
+criterion = "0.5"
+trybuild = "1.0"
+
+[features]
+default = ["derive"]
+derive = ["arrow_convert_derive"]
+
+[lib]
+bench = false
+
+[[bench]]
+name = "bench"
+harness = false

@@ -1,6 +1,7 @@
 [workspace]
+resolver = "2"
 members = [
-    "arrow2_convert",
-    "arrow2_convert_derive",
+    "arrow_convert",
+    "arrow_convert_derive",
     "examples/simple"
 ]

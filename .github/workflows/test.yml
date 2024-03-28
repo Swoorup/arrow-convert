@@ -18,9 +18,9 @@ jobs:
         # We keep these separate since sometimes the derive fails when
         # independently built.
         run: |
-          cargo build -p arrow2_convert_derive
-          cargo build -p arrow2_convert
-          cargo build -p arrow2_convert_example_simple
+          cargo build -p arrow_convert_derive
+          cargo build -p arrow_convert
+          cargo build -p arrow_convert_example_simple
 
   clippy:
     name: Clippy
