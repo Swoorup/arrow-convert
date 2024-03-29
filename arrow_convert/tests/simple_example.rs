@@ -7,7 +7,6 @@ use arrow_convert::{
     ArrowSerialize,
 };
 
-// #[derive(Debug, Clone, PartialEq, Eq, ArrowField, ArrowDeserialize)]
 #[derive(Debug, Clone, PartialEq, Eq, ArrowField, ArrowSerialize, ArrowDeserialize)]
 pub struct Foo {
     name: String,

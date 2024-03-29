@@ -391,7 +391,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
             type BaseArrayType = arrow::array::StructArray;
 
             #[inline]
-            fn iter_from_array_ref<'a>(b: &'a dyn arrow::array::Array)  -> <&'a Self as arrow_convert::deserialize::IntoArrowArrayIterator>::IntoIter
+            fn iter_from_array_ref<'a>(b: &'a dyn arrow::array::Array)  -> <Self as arrow_convert::deserialize::ArrowArrayIterable>::Iter<'a>
             {
                 use core::ops::Deref;
                 use arrow::array::Array;
@@ -411,13 +411,13 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
         }
     };
 
-    let array_into_iterator_impl = quote! {
-        impl<'a> arrow_convert::deserialize::IntoArrowArrayIterator for &'a #array_name
+    let array_iterable_impl = quote! {
+        impl arrow_convert::deserialize::ArrowArrayIterable for #array_name
         {
-            type Item = Option<#original_name>;
-            type IntoIter = #iterator_name<'a>;
+            type Item<'a> = Option<#original_name>;
+            type Iter<'a> = #iterator_name<'a>;
 
-            fn into_iter(self) -> Self::IntoIter {
+            fn iter(&self) -> Self::Iter<'_> {
                 unimplemented!("Use iter_from_array_ref");
             }
         }
@@ -426,7 +426,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
     let iterator_decl = quote! {
         #visibility struct #iterator_name<'a> {
             #(
-                #field_idents: <&'a <#field_types as arrow_convert::deserialize::ArrowDeserialize>::ArrayType as arrow_convert::deserialize::IntoArrowArrayIterator>::IntoIter,
+                #field_idents: <<#field_types as arrow_convert::deserialize::ArrowDeserialize>::ArrayType as arrow_convert::deserialize::ArrowArrayIterable>::Iter<'a>,
             )*
             validity_iter: arrow::util::bit_iterator::BitIterator<'a>,
             has_validity: bool
@@ -503,7 +503,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
                 type ArrayType = <#first_type as arrow_convert::deserialize::ArrowDeserialize>::ArrayType;
 
                 #[inline]
-                fn arrow_deserialize<'a>(v: <&Self::ArrayType as arrow_convert::deserialize::IntoArrowArrayIterator>::Item) -> Option<Self> {
+                fn arrow_deserialize<'a>(v: <Self::ArrayType as arrow_convert::deserialize::ArrowArrayIterable>::Item<'a>) -> Option<Self> {
                     <#first_type as arrow_convert::deserialize::ArrowDeserialize>::arrow_deserialize(v).map(#deser_body_mapper)
                 }
             }
@@ -523,7 +523,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
         TokenStream::from_iter([
             array_decl,
             array_impl,
-            array_into_iterator_impl,
+            array_iterable_impl,
             iterator_decl,
             iterator_impl,
             iterator_iterator_impl,

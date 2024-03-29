@@ -319,7 +319,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 Ok(())
             }
 
-            // fn try_extend<I: arrow_convert::deserialize::IntoArrowArrayIterator<Item = Option<__T>>>(&mut self, iter: impl arrow_convert::deserialize::IntoArrowArrayIterator<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> arrow::error::Result<()> {
+            // fn try_extend<I: arrow_convert::deserialize::ArrowArrayIterable<Item = Option<__T>>>(&mut self, iter: impl arrow_convert::deserialize::ArrowArrayIterable<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> arrow::error::Result<()> {
             fn try_extend(&mut self, iter: impl IntoIterator<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> arrow::error::Result<()> {
                 use arrow_convert::serialize::PushNull;
                 for i in iter {
@@ -519,7 +519,7 @@ pub fn expand_deserialize(input: DeriveEnum) -> TokenStream {
             type BaseArrayType = arrow::array::UnionArray;
 
             #[inline]
-            fn iter_from_array_ref<'a>(b: &'a dyn arrow::array::Array)  -> <&'a Self as arrow_convert::deserialize::IntoArrowArrayIterator>::IntoIter
+            fn iter_from_array_ref<'a>(b: &'a dyn arrow::array::Array)  -> <Self as arrow_convert::deserialize::ArrowArrayIterable>::Iter<'a>
             {
                 let arr = b.as_any().downcast_ref::<arrow::array::UnionArray>().unwrap();
 
@@ -531,13 +531,13 @@ pub fn expand_deserialize(input: DeriveEnum) -> TokenStream {
         }
     };
 
-    let array_into_iterator_impl = quote! {
-        impl<'a> arrow_convert::deserialize::IntoArrowArrayIterator for &'a #array_name
+    let array_iterable_impl = quote! {
+        impl arrow_convert::deserialize::ArrowArrayIterable for #array_name
         {
-            type Item = Option<#original_name>;
-            type IntoIter = #iterator_name<'a>;
+            type Item<'a> = Option<#original_name>;
+            type Iter<'a> = #iterator_name<'a>;
 
-            fn into_iter(self) -> Self::IntoIter {
+            fn iter(&self) -> Self::Iter<'_> {
                 unimplemented!("Use iter_from_array_ref");
             }
         }
@@ -584,7 +584,7 @@ pub fn expand_deserialize(input: DeriveEnum) -> TokenStream {
     TokenStream::from_iter([
         array_decl,
         array_impl,
-        array_into_iterator_impl,
+        array_iterable_impl,
         array_iterator_decl,
         array_iterator_iterator_impl,
         field_arrow_deserialize_impl,
