@@ -78,7 +78,7 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             .map(|field| match &field.field_type {
                 syn::Type::Path(_) => &field.field_type,
                 syn::Type::Array(_) => &field.field_type,
-                x => panic!("Only types are supported atm: {:#?}", x),
+                _ => panic!("Only `Path` and `Array` types are supported atm"),
             })
             .collect::<Vec<&syn::Type>>();
 
