@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.6.2"
+version = "0.6.3"
 authors = [
   "Swoorup Joshi <swoorupj@gmail.com>",
   "Jorge Leitao <jorgecarleitao@gmail.com>",
@@ -20,8 +20,8 @@ repository = "https://github.com/Swoorup/arrow-convert"
 
 [workspace.dependencies]
 # workspace crates
-arrow_convert = { path = "arrow_convert", version = "0.6.2" }
-arrow_convert_derive = { path = "arrow_convert_derive", version = "0.6.2" }
+arrow_convert = { path = "arrow_convert", version = "0.6.3" }
+arrow_convert_derive = { path = "arrow_convert_derive", version = "0.6.3" }
 
 arrow = "51.0"
 chrono = { version = "0.4", default-features = false }
