@@ -9,16 +9,16 @@ repository.workspace = true
 description = "Convert between nested rust types and Arrow with arrow"
 
 [dependencies]
-arrow = "51.0"
-arrow_convert_derive = { version = "0.6.0", path = "../arrow_convert_derive", optional = true }
-half = { version = "2.1", default-features = false }
-chrono = { version = "0.4", default_features = false, features = ["std"] }
-err-derive = "0.3"
+arrow = { workspace = true }
+arrow_convert_derive = { workspace = true, optional = true }
+half = { workspace = true }
+chrono = { workspace = true, features = ["std"] }
+err-derive = { workspace = true }
 
 [dev-dependencies]
-arrow_convert_derive = { version = "0.6.0", path = "../arrow_convert_derive" }
-criterion = "0.5"
-trybuild = "1.0"
+arrow_convert_derive = { workspace = true }
+criterion = { workspace = true }
+trybuild = { workspace = true }
 
 [features]
 default = ["derive"]

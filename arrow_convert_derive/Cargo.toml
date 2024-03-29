@@ -12,7 +12,7 @@ description = "Proc macros for arrow_convert"
 proc-macro = true
 
 [dependencies]
-syn = { version = "1", features=["full"] }
-quote = "1"
-proc-macro2 = "1"
-proc-macro-error = { version = "1" }
+syn = { workspace = true, features = ["full"] }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+proc-macro-error = { workspace = true }

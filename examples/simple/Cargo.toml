@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-arrow = "51.0"
-arrow_convert = { version = "0.6", path = "../../arrow_convert" }
+arrow = { workspace = true }
+arrow_convert = { workspace = true }
