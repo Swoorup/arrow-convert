@@ -204,7 +204,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
 
                 match item {
                     Some(i) =>  {
-                        let i = i.borrow();
+                        let i = i.borrow() as &#original_name;
                         #(
                             <#field_types as arrow_convert::serialize::ArrowSerialize>::arrow_serialize(i.#field_names.borrow(), &mut self.#field_idents)?;
                         )*;
