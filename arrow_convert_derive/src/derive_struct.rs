@@ -12,7 +12,7 @@ struct Common<'a> {
     field_idents: Vec<syn::Ident>,
     skipped_field_names: Vec<syn::Member>,
     field_indices: Vec<syn::LitInt>,
-    field_types: Vec<&'a syn::TypePath>,
+    field_types: Vec<&'a syn::Type>,
 }
 
 impl<'a> From<&'a DeriveStruct> for Common<'a> {
@@ -73,13 +73,14 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             })
             .collect::<Vec<_>>();
 
-        let field_types: Vec<&syn::TypePath> = fields
+        let field_types: Vec<&syn::Type> = fields
             .iter()
             .map(|field| match &field.field_type {
-                syn::Type::Path(path) => path,
-                _ => panic!("Only types are supported atm"),
+                syn::Type::Path(_) => &field.field_type,
+                syn::Type::Array(_) => &field.field_type,
+                x => panic!("Only types are supported atm: {:#?}", x),
             })
-            .collect::<Vec<&syn::TypePath>>();
+            .collect::<Vec<&syn::Type>>();
 
         Self {
             original_name,
@@ -204,7 +205,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
 
                 match item {
                     Some(i) =>  {
-                        let i = i.borrow();
+                        let i = i.borrow() as &#original_name;
                         #(
                             <#field_types as arrow_convert::serialize::ArrowSerialize>::arrow_serialize(i.#field_names.borrow(), &mut self.#field_idents)?;
                         )*;

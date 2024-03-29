@@ -386,7 +386,6 @@ where
         arrow_deserialize_vec_helper::<T>(v)
     }
 }
-
 impl<'a, OffsetSize: OffsetSizeTrait> IntoArrowArrayIterator for &'a GenericListArray<OffsetSize> {
     type Item = Option<Arc<dyn Array>>;
 
@@ -430,6 +429,29 @@ where
 
     fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
         arrow_deserialize_vec_helper::<T>(v)
+    }
+}
+impl<T, const SIZE: usize> ArrowDeserialize for [T; SIZE]
+where
+    T: ArrowDeserialize + ArrowEnableVecForType + 'static,
+    <T as ArrowDeserialize>::ArrayType: 'static,
+    for<'b> &'b <T as ArrowDeserialize>::ArrayType: IntoArrowArrayIterator,
+{
+    type ArrayType = FixedSizeListArray;
+
+    fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
+        let result = arrow_deserialize_vec_helper::<T>(v)?;
+        let length = result.len();
+
+        match <[<T as ArrowField>::Type; SIZE]>::try_from(result).ok() {
+            None => panic!(
+                "Expected size of {} deserializing array of type `{}`, got {}",
+                std::any::type_name::<T>(),
+                SIZE,
+                length
+            ),
+            array => array,
+        }
     }
 }
 

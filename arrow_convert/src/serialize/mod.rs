@@ -384,6 +384,31 @@ where
     }
 }
 
+impl<T, const SIZE: usize> ArrowSerialize for [T; SIZE]
+where
+    T: ArrowSerialize + ArrowEnableVecForType + 'static,
+    <T as ArrowSerialize>::ArrayBuilderType: Default,
+{
+    type ArrayBuilderType = FixedSizeListBuilder<<T as ArrowSerialize>::ArrayBuilderType>;
+
+    #[inline]
+    fn new_array() -> Self::ArrayBuilderType {
+        Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array(), SIZE as i32)
+    }
+
+    fn arrow_serialize(
+        v: &<Self as ArrowField>::Type,
+        array: &mut Self::ArrayBuilderType,
+    ) -> arrow::error::Result<()> {
+        let values = array.values();
+        for i in v.iter() {
+            <T as ArrowSerialize>::arrow_serialize(i, values)?;
+        }
+        array.append(true);
+        Ok(())
+    }
+}
+
 // internal helper method to extend a mutable array
 fn arrow_serialize_extend_internal<
     'a,
