@@ -5,3 +5,15 @@ members = [
     "arrow_convert_derive",
     "examples/simple"
 ]
+
+[workspace.package]
+version = "0.6.1"
+authors = [
+  "Swoorup Joshi <swoorupj@gmail.com>",
+  "Jorge Leitao <jorgecarleitao@gmail.com>",
+  "Chandra Penke <chandrapenke@gmail.com>",
+]
+edition = "2021"
+license = "Apache-2.0 OR MIT"
+keywords = ["Arrow", "arrow"]
+repository = "https://github.com/Swoorup/arrow-convert"

@@ -308,6 +308,20 @@ where
     }
 }
 
+impl<T, const SIZE: usize> ArrowField for [T; SIZE]
+where
+    T: ArrowField + ArrowEnableVecForType,
+{
+    type Type = [<T as ArrowField>::Type; SIZE];
+    type Native = [<T as ArrowField>::Native; SIZE];
+
+    #[inline]
+    fn data_type() -> arrow::datatypes::DataType {
+        let field = Field::new("item", <T as ArrowField>::data_type(), true);
+        arrow::datatypes::DataType::FixedSizeList(Arc::new(field), SIZE as i32)
+    }
+}
+
 arrow_enable_vec_for_type!(String);
 arrow_enable_vec_for_type!(LargeString);
 arrow_enable_vec_for_type!(bool);
