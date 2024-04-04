@@ -1,8 +1,9 @@
-use arrow::array::*;
+use arrow::{array::*, datatypes::*};
 use arrow_convert::{
     deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField,
     ArrowSerialize,
 };
+use pretty_assertions::assert_eq;
 
 #[test]
 fn test_dense_enum_unit_variant() {
@@ -22,6 +23,21 @@ fn test_dense_enum_unit_variant() {
         TestEnum::VAL4,
     ];
     let b: ArrayRef = enums.try_into_arrow().unwrap();
+    assert_eq!(
+        b.data_type(),
+        &DataType::Union(
+            UnionFields::new(
+                vec![0, 1, 2, 3],
+                vec![
+                    Field::new("VAL1", DataType::Boolean, false),
+                    Field::new("VAL2", DataType::Boolean, false),
+                    Field::new("VAL3", DataType::Boolean, false),
+                    Field::new("VAL4", DataType::Boolean, false),
+                ]
+            ),
+            UnionMode::Dense
+        )
+    );
     let round_trip: Vec<TestEnum> = b.try_into_collection().unwrap();
     assert_eq!(round_trip, enums);
 }
@@ -44,6 +60,21 @@ fn test_sparse_enum_unit_variant() {
         TestEnum::VAL4,
     ];
     let b: ArrayRef = enums.try_into_arrow().unwrap();
+    assert_eq!(
+        b.data_type(),
+        &DataType::Union(
+            UnionFields::new(
+                vec![0, 1, 2, 3],
+                vec![
+                    Field::new("VAL1", DataType::Boolean, false),
+                    Field::new("VAL2", DataType::Boolean, false),
+                    Field::new("VAL3", DataType::Boolean, false),
+                    Field::new("VAL4", DataType::Boolean, false),
+                ]
+            ),
+            UnionMode::Sparse
+        )
+    );
     let round_trip: Vec<TestEnum> = b.try_into_collection().unwrap();
     assert_eq!(round_trip, enums);
 }

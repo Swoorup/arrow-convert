@@ -1,7 +1,8 @@
 use proc_macro2::Span;
-use proc_macro_error::{abort, ResultExt};
+use proc_macro_error::abort;
+
 use syn::spanned::Spanned;
-use syn::{DeriveInput, Ident, Lit, Meta, MetaNameValue, Visibility};
+use syn::{DeriveInput, Ident, Lit, Meta, Visibility};
 
 pub const ARROW_FIELD: &str = "arrow_field";
 pub const FIELD_TYPE: &str = "type";
@@ -83,42 +84,38 @@ impl ContainerAttrs {
         let mut is_transparent: Option<Span> = None;
 
         for attr in attrs {
-            if let Ok(meta) = attr.parse_meta() {
-                if meta.path().is_ident(ARROW_FIELD) {
-                    if let Meta::List(list) = meta {
-                        for nested in list.nested {
-                            if let syn::NestedMeta::Meta(meta) = nested {
-                                match meta {
-                                    syn::Meta::NameValue(MetaNameValue {
-                                        lit: Lit::Str(string),
-                                        path,
-                                        ..
-                                    }) if path.is_ident(UNION_TYPE) => {
-                                        match string.value().as_ref() {
-                                            UNION_TYPE_DENSE => {
-                                                is_dense = Some(true);
-                                            }
-                                            UNION_TYPE_SPARSE => {
-                                                is_dense = Some(false);
-                                            }
-                                            _ => {
-                                                abort!(path.span(), "Unexpected value for mode");
-                                            }
-                                        }
-                                    }
+            if attr.path().is_ident(ARROW_FIELD) {
+                let _ = attr.parse_nested_meta(|meta| {
+                    if let Meta::List(list) = &attr.meta {
+                        list.parse_nested_meta(|nested| {
+                            if nested.path.is_ident(TRANSPARENT) {
+                                is_transparent = Some(nested.path.span());
+                                Ok(())
+                            } else if nested.path.is_ident(UNION_TYPE) {
+                                let value = nested.value()?;
+                                let Lit::Str(string) = value.parse()? else {
+                                    return Err(nested.error("Unexpected value for mode"));
+                                };
 
-                                    Meta::Path(path) if path.is_ident(TRANSPARENT) => {
-                                        is_transparent = Some(path.span());
+                                match string.value().as_ref() {
+                                    UNION_TYPE_DENSE => {
+                                        is_dense = Some(true);
+                                        Ok(())
                                     }
-
-                                    _ => {
-                                        abort!(meta.span(), "Unexpected attribute");
+                                    UNION_TYPE_SPARSE => {
+                                        is_dense = Some(false);
+                                        Ok(())
                                     }
+                                    _ => Err(nested.error("Unexpected value for mode")),
                                 }
+                            } else {
+                                Err(meta.error("Unexpected attribute"))
                             }
-                        }
-                    }
-                }
+                        })?;
+                    };
+
+                    Ok(())
+                });
             }
         }
 
@@ -135,29 +132,29 @@ impl FieldAttrs {
         let mut skip = false;
 
         for attr in input {
-            if let Ok(meta) = attr.parse_meta() {
-                if meta.path().is_ident(ARROW_FIELD) {
-                    if let Meta::List(list) = meta {
-                        for nested in list.nested {
-                            if let syn::NestedMeta::Meta(meta) = nested {
-                                match meta {
-                                    Meta::NameValue(MetaNameValue {
-                                        lit: Lit::Str(string),
-                                        path,
-                                        ..
-                                    }) if path.is_ident(FIELD_TYPE) => {
-                                        field_type =
-                                            Some(syn::parse_str(&string.value()).unwrap_or_abort());
-                                    }
-                                    Meta::Path(path) if path.is_ident(FIELD_SKIP) => skip = true,
-                                    _ => {
-                                        abort!(meta.span(), "Unexpected attribute");
-                                    }
-                                }
-                            }
+            if attr.path().is_ident(ARROW_FIELD) {
+                let _ = attr.parse_nested_meta(|meta| {
+                    let Meta::List(list) = &attr.meta else {
+                        return Err(meta.error("Unexpected attribute"));
+                    };
+
+                    list.parse_nested_meta(|nested| {
+                        if nested.path.is_ident(FIELD_SKIP) {
+                            skip = true;
+                            Ok(())
+                        } else if nested.path.is_ident(FIELD_TYPE) {
+                            let value = nested.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(meta.error("Unexpected attribute"));
+                            };
+
+                            field_type = Some(syn::parse_str(&string.value())?);
+                            Ok(())
+                        } else {
+                            return Err(meta.error("Unexpected attribute"));
                         }
-                    }
-                }
+                    })
+                });
             }
         }
 
@@ -237,7 +234,8 @@ impl DeriveVariant {
                     (false, f.unnamed[0].ty.clone())
                 }
             }
-            syn::Fields::Unit => (true, syn::parse_str("bool").unwrap_or_abort()),
+
+            syn::Fields::Unit => (true, syn::parse_str("bool").unwrap()),
         };
         DeriveVariant {
             syn: input.clone(),

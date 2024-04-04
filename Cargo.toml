@@ -31,6 +31,6 @@ half = { version = "2.1", default-features = false }
 proc-macro-error = "1"
 proc-macro2 = "1"
 quote = "1"
-syn = "1"
+syn = "2"
 trybuild = "1.0"
 pretty_assertions = "1.4"
