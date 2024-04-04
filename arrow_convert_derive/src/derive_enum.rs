@@ -14,7 +14,7 @@ struct Common<'a> {
     variant_names: Vec<proc_macro2::Ident>,
     variant_names_str: Vec<syn::LitStr>,
     variant_indices: Vec<syn::LitInt>,
-    variant_types: Vec<&'a syn::TypePath>,
+    variant_types: Vec<&'a syn::Type>,
 }
 
 impl<'a> From<&'a DeriveEnum> for Common<'a> {
@@ -56,13 +56,15 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
             })
             .collect::<Vec<_>>();
 
-        let variant_types: Vec<&syn::TypePath> = variants
+        let variant_types: Vec<&syn::Type> = variants
             .iter()
             .map(|v| match &v.field_type {
-                syn::Type::Path(path) => path,
-                _ => panic!("Only types are supported atm"),
+                syn::Type::Path(_) => &v.field_type,
+                syn::Type::Array(_) => &v.field_type,
+                syn::Type::Reference(_) => &v.field_type,
+                _ => panic!("Only `Path`, `Array`, `Reference` types are supported atm"),
             })
-            .collect::<Vec<&syn::TypePath>>();
+            .collect::<Vec<&syn::Type>>();
 
         Self {
             original_name,
@@ -95,7 +97,6 @@ pub fn expand_field(input: DeriveEnum) -> TokenStream {
     quote! {
         impl arrow_convert::field::ArrowField for #original_name {
             type Type = Self;
-            type Native = Self;
 
             fn data_type() -> arrow::datatypes::DataType {
                 arrow::datatypes::DataType::Union(

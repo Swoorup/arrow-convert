@@ -78,7 +78,8 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             .map(|field| match &field.field_type {
                 syn::Type::Path(_) => &field.field_type,
                 syn::Type::Array(_) => &field.field_type,
-                _ => panic!("Only `Path` and `Array` types are supported atm"),
+                syn::Type::Reference(_) => &field.field_type,
+                _ => panic!("Only `Path`, `Array`, `Reference` types are supported atm"),
             })
             .collect::<Vec<&syn::Type>>();
 
@@ -129,7 +130,6 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
     quote!(
         impl arrow_convert::field::ArrowField for #original_name {
             type Type = Self;
-            type Native = Self;
 
             fn data_type() -> arrow::datatypes::DataType {
                 #data_type_impl

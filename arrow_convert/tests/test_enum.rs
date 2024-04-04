@@ -148,6 +148,7 @@ fn test_slice() {
         VAL2(i32),
         VAL3(f64),
         VAL4(TestStruct),
+        VAL5([i32; 2]),
     }
 
     let enums = vec![

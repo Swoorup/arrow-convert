@@ -27,10 +27,6 @@ pub trait ArrowField {
     /// type is LargeString, this should be String.
     type Type;
 
-    /// the Native Arrow data type backing this field. This should be `Self::Type` in most cases,
-    /// with the exception of `NaiveDate`
-    type Native;
-
     /// The [`DataType`]
     fn data_type() -> DataType;
 
@@ -72,7 +68,6 @@ macro_rules! impl_numeric_type {
     ($physical_type:ty, $logical_type:ident) => {
         impl ArrowField for $physical_type {
             type Type = $physical_type;
-            type Native = $physical_type;
 
             #[inline]
             fn data_type() -> arrow::datatypes::DataType {
@@ -95,7 +90,6 @@ where
     T: ArrowField,
 {
     type Type = Option<<T as ArrowField>::Type>;
-    type Native = Option<<T as ArrowField>::Native>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -126,7 +120,6 @@ pub struct I128<const PRECISION: u8, const SCALE: i8> {}
 
 impl<const PRECISION: u8, const SCALE: i8> ArrowField for I128<PRECISION, SCALE> {
     type Type = i128;
-    type Native = i128;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -134,9 +127,17 @@ impl<const PRECISION: u8, const SCALE: i8> ArrowField for I128<PRECISION, SCALE>
     }
 }
 
+impl<'a> ArrowField for &'a str {
+    type Type = &'a str;
+
+    #[inline]
+    fn data_type() -> arrow::datatypes::DataType {
+        arrow::datatypes::DataType::Utf8
+    }
+}
+
 impl ArrowField for String {
-    type Type = String;
-    type Native = String;
+    type Type = Self;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -149,7 +150,6 @@ pub struct LargeString {}
 
 impl ArrowField for LargeString {
     type Type = String;
-    type Native = String;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -159,7 +159,6 @@ impl ArrowField for LargeString {
 
 impl ArrowField for bool {
     type Type = Self;
-    type Native = Self;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -169,7 +168,6 @@ impl ArrowField for bool {
 
 impl ArrowField for NaiveDateTime {
     type Type = Self;
-    type Native = i64;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -179,7 +177,6 @@ impl ArrowField for NaiveDateTime {
 
 impl ArrowField for NaiveDate {
     type Type = Self;
-    type Native = i32;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -190,7 +187,6 @@ impl ArrowField for NaiveDate {
 // Treat both Buffer and ScalarBuffer<u8> the same
 impl ArrowField for Buffer {
     type Type = Self;
-    type Native = Self;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -199,7 +195,6 @@ impl ArrowField for Buffer {
 }
 impl ArrowField for ScalarBuffer<u8> {
     type Type = Self;
-    type Native = Self;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -209,7 +204,6 @@ impl ArrowField for ScalarBuffer<u8> {
 
 impl ArrowField for Vec<u8> {
     type Type = Self;
-    type Native = Self;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -222,7 +216,6 @@ pub struct LargeBinary {}
 
 impl ArrowField for LargeBinary {
     type Type = Vec<u8>;
-    type Native = Vec<u8>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -235,11 +228,19 @@ pub struct FixedSizeBinary<const SIZE: i32> {}
 
 impl<const SIZE: i32> ArrowField for FixedSizeBinary<SIZE> {
     type Type = Vec<u8>;
-    type Native = Vec<u8>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
         arrow::datatypes::DataType::FixedSizeBinary(SIZE)
+    }
+}
+
+impl<const SIZE: usize> ArrowField for [u8; SIZE] {
+    type Type = Self;
+
+    #[inline]
+    fn data_type() -> arrow::datatypes::DataType {
+        arrow::datatypes::DataType::FixedSizeBinary(SIZE as i32)
     }
 }
 
@@ -249,7 +250,6 @@ where
     T: ArrowField + ArrowNativeType + ArrowEnableVecForType,
 {
     type Type = Self;
-    type Native = Self;
 
     #[inline]
     fn data_type() -> DataType {
@@ -263,7 +263,6 @@ where
     T: ArrowField + ArrowEnableVecForType,
 {
     type Type = Vec<<T as ArrowField>::Type>;
-    type Native = Vec<<T as ArrowField>::Native>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -281,7 +280,6 @@ where
     T: ArrowField + ArrowEnableVecForType,
 {
     type Type = Vec<<T as ArrowField>::Type>;
-    type Native = Vec<<T as ArrowField>::Native>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -299,7 +297,6 @@ where
     T: ArrowField + ArrowEnableVecForType,
 {
     type Type = Vec<<T as ArrowField>::Type>;
-    type Native = Vec<<T as ArrowField>::Native>;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
@@ -313,7 +310,6 @@ where
     T: ArrowField + ArrowEnableVecForType,
 {
     type Type = [<T as ArrowField>::Type; SIZE];
-    type Native = [<T as ArrowField>::Native; SIZE];
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {

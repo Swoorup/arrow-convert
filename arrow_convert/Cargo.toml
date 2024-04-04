@@ -19,6 +19,7 @@ err-derive = { workspace = true }
 arrow_convert_derive = { workspace = true }
 criterion = { workspace = true }
 trybuild = { workspace = true }
+pretty_assertions = { workspace = true }
 
 [features]
 default = ["derive"]

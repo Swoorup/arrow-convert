@@ -110,6 +110,21 @@ impl<const PRECISION: u8, const SCALE: i8> ArrowSerialize for I128<PRECISION, SC
     }
 }
 
+impl<'a> ArrowSerialize for &'a str {
+    type ArrayBuilderType = StringBuilder;
+
+    #[inline]
+    fn new_array() -> Self::ArrayBuilderType {
+        Self::ArrayBuilderType::default()
+    }
+
+    #[inline]
+    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+        array.append_option(Some(v));
+        Ok(())
+    }
+}
+
 impl ArrowSerialize for String {
     type ArrayBuilderType = StringBuilder;
 

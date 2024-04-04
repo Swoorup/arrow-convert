@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use arrow::datatypes::*;
 use arrow_convert::ArrowField;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn test_schema_types() {
@@ -48,6 +49,10 @@ fn test_schema_types() {
         // large string
         #[arrow_field(type = "arrow_convert::field::LargeString")]
         large_string: String,
+        // fixed chars
+        area: [u8; 6],
+        // string ref
+        area_name: &'static str,
         // large vec
         #[arrow_field(type = "arrow_convert::field::LargeVec<i64>")]
         large_vec: Vec<i64>,
@@ -213,6 +218,8 @@ fn test_schema_types() {
             Field::new("large_binary", DataType::LargeBinary, false),
             Field::new("fixed_size_binary", DataType::FixedSizeBinary(3), false),
             Field::new("large_string", DataType::LargeUtf8, false),
+            Field::new("area", DataType::FixedSizeBinary(6), false),
+            Field::new("area_name", DataType::Utf8, false),
             Field::new(
                 "large_vec",
                 DataType::LargeList(Arc::new(Field::new("item", DataType::Int64, false))),

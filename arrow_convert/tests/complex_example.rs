@@ -81,7 +81,6 @@ pub struct CustomType(u64);
 /// - ArrowDeserialize
 impl arrow_convert::field::ArrowField for CustomType {
     type Type = Self;
-    type Native = u64;
 
     #[inline]
     fn data_type() -> arrow::datatypes::DataType {
