@@ -282,6 +282,20 @@ impl<const SIZE: i32> ArrowSerialize for FixedSizeBinary<SIZE> {
     }
 }
 
+impl<const SIZE: usize> ArrowSerialize for [u8; SIZE] {
+    type ArrayBuilderType = FixedSizeBinaryBuilder;
+
+    #[inline]
+    fn new_array() -> Self::ArrayBuilderType {
+        Self::ArrayBuilderType::new(SIZE as i32)
+    }
+
+    #[inline]
+    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+        array.append_value(v)
+    }
+}
+
 // Blanket implementation for Buffer
 impl<T> ArrowSerialize for ScalarBuffer<T>
 where

@@ -263,6 +263,15 @@ impl<const SIZE: i32> ArrowDeserialize for FixedSizeBinary<SIZE> {
     }
 }
 
+impl<const SIZE: usize> ArrowDeserialize for [u8; SIZE] {
+    type ArrayType = FixedSizeBinaryArray;
+
+    #[inline]
+    fn arrow_deserialize(v: Option<&[u8]>) -> Option<[u8; SIZE]> {
+        v.map(|t| t.to_vec().try_into().unwrap())
+    }
+}
+
 fn arrow_deserialize_vec_helper<T>(
     v: Option<Arc<dyn Array>>,
 ) -> Option<<Vec<T> as ArrowField>::Type>

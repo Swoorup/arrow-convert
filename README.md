@@ -66,6 +66,7 @@ Default implementations of the above traits are provided for the following:
     - [`chrono::NaiveDate`], [`chrono::NaiveDateTime`]
 - Option<T> if T implements `ArrowField`
 - Vec<T> if T implements `ArrowField`
+- `[T; SIZE]` if T implements `ArrowField`
 - Large Arrow types [`LargeBinary`], [`LargeString`], [`LargeList`] are supported via the `type` attribute. Please see the [complex_example.rs](./arrow_convert/tests/complex_example.rs) for usage.
 - Fixed size types [`FixedSizeBinary`], [`FixedSizeList`] are supported via the `FixedSizeVec` type override.
     - Note: nesting of [`FixedSizeList`] is not supported.

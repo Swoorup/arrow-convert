@@ -12,6 +12,8 @@ use std::borrow::Borrow;
 #[derive(Debug, Clone, PartialEq, ArrowField, ArrowSerialize, ArrowDeserialize)]
 pub struct Root {
     name: Option<String>,
+    area: [u8; 6],
+    age: u8,
     is_deleted: bool,
     a1: Option<f64>,
     a2: i64,
@@ -120,6 +122,8 @@ fn item1() -> Root {
 
     Root {
         name: Some("a".to_string()),
+        area: "SYDNEY".as_bytes().try_into().unwrap(),
+        age: 28,
         is_deleted: false,
         a1: Some(0.1),
         a2: 1,
@@ -166,6 +170,8 @@ fn item2() -> Root {
 
     Root {
         name: Some("b".to_string()),
+        area: "SYDNEY".as_bytes().try_into().unwrap(),
+        age: 28,
         is_deleted: true,
         a1: Some(0.1),
         a2: 1,
@@ -220,7 +226,7 @@ fn test_round_trip() -> arrow::error::Result<()> {
     assert_eq!(struct_array.len(), 2);
 
     let values = struct_array.columns();
-    assert_eq!(values.len(), 21);
+    assert_eq!(values.len(), 23);
     assert_eq!(struct_array.len(), 2);
 
     // can iterate one struct at a time without collecting
