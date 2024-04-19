@@ -424,9 +424,13 @@ where
     <ArrowType as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
 {
     if &<ArrowType as ArrowField>::data_type() != arr.data_type() {
-        Err(arrow::error::ArrowError::InvalidArgumentError(
-            "Data type mismatch".to_string(),
-        ))
+        Err(arrow::error::ArrowError::InvalidArgumentError(format!(
+            "Data type mismatch. Expected type={} is_nullable={}, but was type={} is_nullable={}",
+            &<ArrowType as ArrowField>::data_type(),
+            &<ArrowType as ArrowField>::is_nullable(),
+            arr.data_type(),
+            arr.is_nullable()
+        )))
     } else {
         Ok(arrow_array_deserialize_iterator_internal::<
             Element,
