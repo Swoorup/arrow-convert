@@ -383,6 +383,7 @@ impl_arrow_array!(ListArray);
 impl_arrow_array!(LargeListArray);
 impl_arrow_array!(FixedSizeListArray);
 impl_arrow_array!(Date32Array);
+impl_arrow_array!(Date64Array);
 impl_arrow_array!(TimestampNanosecondArray);
 
 /// Top-level API to deserialize from Arrow
