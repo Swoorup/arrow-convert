@@ -425,7 +425,7 @@ where
 {
     if &<ArrowType as ArrowField>::data_type() != arr.data_type() {
         Err(arrow::error::ArrowError::InvalidArgumentError(format!(
-            "Data type mismatch. Expected type={} is_nullable={}, but was type={} is_nullable={}",
+            "Data type mismatch. Expected type={:#?} is_nullable={}, but was type={:#?} is_nullable={}",
             &<ArrowType as ArrowField>::data_type(),
             &<ArrowType as ArrowField>::is_nullable(),
             arr.data_type(),

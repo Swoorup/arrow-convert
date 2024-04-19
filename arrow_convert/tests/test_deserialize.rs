@@ -1,6 +1,7 @@
 use arrow::buffer::ScalarBuffer;
 use arrow::error::Result;
 use arrow::{array::*, buffer::Buffer};
+use arrow_convert::field::ArrowField;
 use arrow_convert::{deserialize::*, serialize::*, ArrowDeserialize, ArrowField, ArrowSerialize};
 
 #[test]
@@ -31,6 +32,16 @@ fn test_deserialize_iterator() {
     }
 }
 
+fn data_mismatch_error<Expected: ArrowField, Actual: ArrowField>() -> arrow::error::ArrowError {
+    arrow::error::ArrowError::InvalidArgumentError(format!(
+        "Data type mismatch. Expected type={:#?} is_nullable={}, but was type={:#?} is_nullable={}",
+        Expected::data_type(),
+        Expected::is_nullable(),
+        Actual::data_type(),
+        Actual::is_nullable()
+    ))
+}
+
 #[test]
 fn test_deserialize_schema_mismatch_error() {
     #[derive(Debug, Clone, PartialEq, ArrowField, ArrowSerialize, ArrowDeserialize)]
@@ -45,12 +56,18 @@ fn test_deserialize_schema_mismatch_error() {
     let arr1 = vec![S1 { a: 1 }, S1 { a: 2 }];
     let arr1: ArrayRef = arr1.try_into_arrow().unwrap();
     let result: Result<Vec<S2>> = arr1.try_into_collection();
-    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        data_mismatch_error::<S2, S1>().to_string()
+    );
 
     let arr1 = vec![S1 { a: 1 }, S1 { a: 2 }];
     let arr1: ArrayRef = arr1.try_into_arrow().unwrap();
     let result: Result<Vec<_>> = arr1.try_into_collection_as_type::<S2>();
-    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        data_mismatch_error::<S2, S1>().to_string()
+    );
 }
 
 #[test]
@@ -76,7 +93,10 @@ fn test_deserialize_large_types_schema_mismatch_error() {
     let arr1: ArrayRef = arr1.try_into_arrow().unwrap();
 
     let result: Result<Vec<S2>> = arr1.try_into_collection();
-    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        data_mismatch_error::<S2, S1>().to_string()
+    );
 }
 
 #[test]
