@@ -1,4 +1,4 @@
-error: Expected struct to have more than one field
+error: Expected struct to have at least one field
  --> tests/ui/struct_no_fields.rs:4:8
   |
 4 | struct S {}

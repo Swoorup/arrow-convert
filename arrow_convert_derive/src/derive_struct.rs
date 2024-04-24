@@ -22,6 +22,12 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
 
         let (skipped_fields, fields): (Vec<_>, Vec<_>) =
             input.fields.iter().partition(|field| field.skip);
+        if fields.is_empty() {
+            abort!(
+                original_name.span(),
+                "Expected struct to have at least one field"
+            );
+        }
 
         let field_members = fields
             .iter()
@@ -57,13 +63,6 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
                     .map_or_else(|| syn::Member::Unnamed(id.into()), syn::Member::Named)
             })
             .collect::<Vec<_>>();
-
-        if field_members.is_empty() {
-            abort!(
-                original_name.span(),
-                "Expected struct to have more than one field"
-            );
-        }
 
         let field_indices = field_members
             .iter()
