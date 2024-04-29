@@ -39,7 +39,7 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
         if variant_names.is_empty() {
             abort!(
                 original_name.span(),
-                "Expected enum to have more than one field"
+                "Expected enum to have at least one field"
             );
         }
 

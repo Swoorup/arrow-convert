@@ -6,6 +6,7 @@ use syn::{DeriveInput, Ident, Lit, Meta, Visibility};
 
 pub const ARROW_FIELD: &str = "arrow_field";
 pub const FIELD_TYPE: &str = "type";
+pub const FIELD_NAME: &str = "name";
 pub const FIELD_SKIP: &str = "skip";
 pub const UNION_TYPE: &str = "type";
 pub const UNION_TYPE_SPARSE: &str = "sparse";
@@ -42,12 +43,14 @@ pub struct ContainerAttrs {
 /// All field attributes
 pub struct FieldAttrs {
     pub field_type: Option<syn::Type>,
+    pub field_name: Option<String>,
     pub skip: bool,
 }
 
 pub struct DeriveField {
     pub syn: syn::Field,
     pub field_type: syn::Type,
+    pub field_name: Option<String>,
     pub skip: bool,
 }
 
@@ -129,11 +132,12 @@ impl ContainerAttrs {
 impl FieldAttrs {
     pub fn from_ast(input: &[syn::Attribute]) -> FieldAttrs {
         let mut field_type: Option<syn::Type> = None;
+        let mut field_name: Option<String> = None;
         let mut skip = false;
 
         for attr in input {
             if attr.path().is_ident(ARROW_FIELD) {
-                let _ = attr.parse_nested_meta(|meta| {
+                attr.parse_nested_meta(|meta| {
                     let Meta::List(list) = &attr.meta else {
                         return Err(meta.error("Unexpected attribute"));
                     };
@@ -141,24 +145,33 @@ impl FieldAttrs {
                     list.parse_nested_meta(|nested| {
                         if nested.path.is_ident(FIELD_SKIP) {
                             skip = true;
-                            Ok(())
                         } else if nested.path.is_ident(FIELD_TYPE) {
                             let value = nested.value()?;
                             let Lit::Str(string) = value.parse()? else {
                                 return Err(meta.error("Unexpected attribute"));
                             };
-
                             field_type = Some(syn::parse_str(&string.value())?);
-                            Ok(())
+                        } else if nested.path.is_ident(FIELD_NAME) {
+                            let value = nested.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(meta.error("Unexpected attribute"));
+                            };
+                            field_name = Some(string.value());
                         } else {
                             return Err(meta.error("Unexpected attribute"));
                         }
+                        Ok(())
                     })
-                });
+                })
+                .unwrap_or_default();
             }
         }
 
-        FieldAttrs { field_type, skip }
+        FieldAttrs {
+            field_type,
+            field_name,
+            skip,
+        }
     }
 }
 
@@ -214,6 +227,7 @@ impl DeriveField {
         DeriveField {
             syn: input.clone(),
             field_type: attrs.field_type.unwrap_or_else(|| input.ty.clone()),
+            field_name: attrs.field_name,
             skip: attrs.skip,
         }
     }

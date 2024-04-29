@@ -13,6 +13,7 @@ struct Common<'a> {
     skipped_field_names: Vec<syn::Member>,
     field_indices: Vec<syn::LitInt>,
     field_types: Vec<&'a syn::Type>,
+    field_names: Vec<String>,
 }
 
 impl<'a> From<&'a DeriveStruct> for Common<'a> {
@@ -22,6 +23,12 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
 
         let (skipped_fields, fields): (Vec<_>, Vec<_>) =
             input.fields.iter().partition(|field| field.skip);
+        if fields.is_empty() {
+            abort!(
+                original_name.span(),
+                "Expected struct to have at least one field"
+            );
+        }
 
         let field_members = fields
             .iter()
@@ -58,13 +65,6 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             })
             .collect::<Vec<_>>();
 
-        if field_members.is_empty() {
-            abort!(
-                original_name.span(),
-                "Expected struct to have more than one field"
-            );
-        }
-
         let field_indices = field_members
             .iter()
             .enumerate()
@@ -83,6 +83,18 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             })
             .collect::<Vec<&syn::Type>>();
 
+        let field_names = fields
+            .iter()
+            .enumerate()
+            .map(
+                |(id, field)| match (field.field_name.as_ref(), field.syn.ident.as_ref()) {
+                    (Some(name), _) => name.to_owned(), // override enabled
+                    (_, Some(ident)) => format_ident!("{}", ident).to_string(), // no override, named field
+                    (_, None) => format!("field_{id}"), // no override, unnamed field
+                },
+            )
+            .collect::<Vec<_>>();
+
         Self {
             original_name,
             visibility,
@@ -91,6 +103,7 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             skipped_field_names,
             field_indices,
             field_types,
+            field_names,
         }
     }
 }
@@ -98,9 +111,8 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
 pub fn expand_field(input: DeriveStruct) -> TokenStream {
     let Common {
         original_name,
-        field_members,
-        //field_names_str,
         field_types,
+        field_names,
         ..
     } = (&input).into();
 
@@ -113,14 +125,10 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
                 <#ty as arrow_convert::field::ArrowField>::data_type()
             )
         } else {
-            let field_names = field_members.iter().map(|field| match field {
-                syn::Member::Named(ident) => format_ident!("{}", ident),
-                syn::Member::Unnamed(index) => format_ident!("field_{}", index),
-            });
             quote!(arrow::datatypes::DataType::Struct(
                 arrow::datatypes::Fields::from(vec![
                     #(
-                        <#field_types as arrow_convert::field::ArrowField>::field(stringify!(#field_names)),
+                        <#field_types as arrow_convert::field::ArrowField>::field(#field_names),
                     )*
                 ])
             ))
@@ -144,13 +152,11 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
     let Common {
         original_name,
         visibility,
-        field_members: field_names,
+        field_members,
         field_idents,
         field_types,
         ..
     } = (&input).into();
-
-    let first_field = &field_names[0];
 
     let mutable_array_name = &input.common.mutable_array_name();
     let mutable_field_array_types = field_types
@@ -207,7 +213,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
                     Some(i) =>  {
                         let i = i.borrow() as &#original_name;
                         #(
-                            <#field_types as arrow_convert::serialize::ArrowSerialize>::arrow_serialize(i.#field_names.borrow(), &mut self.#field_idents)?;
+                            <#field_types as arrow_convert::serialize::ArrowSerialize>::arrow_serialize(i.#field_members.borrow(), &mut self.#field_idents)?;
                         )*;
                         match &mut self.validity {
                             Some(validity) => validity.append(true),
@@ -321,6 +327,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
     // Special case for single-field (tuple) structs.
     if input.fields.len() == 1 && input.is_transparent {
         let first_type = &field_types[0];
+        let first_field = &field_members[0];
         // Everything delegates to first field.
         quote! {
             impl arrow_convert::serialize::ArrowSerialize for #original_name {
@@ -368,7 +375,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
     let Common {
         original_name,
         visibility,
-        field_members: field_names,
+        field_members,
         field_idents,
         skipped_field_names,
         field_indices,
@@ -378,7 +385,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
 
     let array_name = &input.common.array_name();
     let iterator_name = &input.common.iterator_name();
-    let is_tuple_struct = matches!(field_names[0], syn::Member::Unnamed(_));
+    let is_tuple_struct = matches!(field_members[0], syn::Member::Unnamed(_));
 
     let array_decl = quote! {
         #visibility struct #array_name
@@ -443,7 +450,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
     } else {
         syn::parse_quote! {
             #original_name {
-                #(#field_names: <#field_types as arrow_convert::deserialize::ArrowDeserialize>::arrow_deserialize_internal(#field_idents),)*
+                #(#field_members: <#field_types as arrow_convert::deserialize::ArrowDeserialize>::arrow_deserialize_internal(#field_idents),)*
                 #(#skipped_field_names: std::default::Default::default(),)*
             }
         }
@@ -493,7 +500,7 @@ pub fn expand_deserialize(input: DeriveStruct) -> TokenStream {
         let deser_body_mapper = if is_tuple_struct {
             quote! { #original_name }
         } else {
-            let first_name = &field_names[0];
+            let first_name = &field_members[0];
             quote! { |v| #original_name { #first_name: v } }
         };
 

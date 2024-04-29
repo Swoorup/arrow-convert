@@ -1,15 +1,16 @@
 use proc_macro_error::{abort, ResultExt};
-use syn::{Lit, Meta, MetaNameValue};
 use syn::spanned::Spanned;
+use syn::{Lit, Meta, MetaNameValue};
 
 pub const ARROW_FIELD: &'static str = "arrow_field";
 pub const FIELD_TYPE: &'static str = "type";
+pub const FIELD_NAME: &'static str = "name";
 pub const UNION_MODE: &'static str = "mode";
 
 pub fn field_type(field: &syn::Field) -> syn::Type {
     for attr in &field.attrs {
         if let Ok(meta) = attr.parse_meta() {
-            if meta.path().is_ident(ARROW_FIELD) { 
+            if meta.path().is_ident(ARROW_FIELD) {
                 if let Meta::List(list) = meta {
                     for nested in list.nested {
                         if let syn::NestedMeta::Meta(meta) = nested {
@@ -20,9 +21,11 @@ pub fn field_type(field: &syn::Field) -> syn::Type {
                                     ..
                                 }) => {
                                     if path.is_ident(FIELD_TYPE) {
-                                        return syn::parse_str(&string.value()).unwrap_or_abort()
+                                        return syn::parse_str(&string.value()).unwrap_or_abort();
+                                    } else if path.is_ident(FIELD_NAME) {
+                                        return syn::parse_str(&string.value()).unwrap_or_abort();
                                     }
-                                },
+                                }
                                 _ => {
                                     abort!(meta.span(), "Unexpected attribute");
                                 }
@@ -40,7 +43,7 @@ pub fn field_type(field: &syn::Field) -> syn::Type {
 pub fn union_type(input: &syn::DeriveInput) -> bool {
     for attr in &input.attrs {
         if let Ok(meta) = attr.parse_meta() {
-            if meta.path().is_ident(ARROW_FIELD) { 
+            if meta.path().is_ident(ARROW_FIELD) {
                 if let Meta::List(list) = meta {
                     for nested in list.nested {
                         if let syn::NestedMeta::Meta(meta) = nested {
@@ -52,12 +55,18 @@ pub fn union_type(input: &syn::DeriveInput) -> bool {
                                 }) => {
                                     if path.is_ident(UNION_MODE) {
                                         match string.value().as_ref() {
-                                            "sparse" => { return false; },
-                                            "dense" => { return true; },
-                                            _ => { abort!(path.span(), "Unexpected value for mode") }
+                                            "sparse" => {
+                                                return false;
+                                            }
+                                            "dense" => {
+                                                return true;
+                                            }
+                                            _ => {
+                                                abort!(path.span(), "Unexpected value for mode")
+                                            }
                                         }
                                     }
-                                },
+                                }
                                 _ => {
                                     abort!(meta.span(), "Unexpected attribute");
                                 }
@@ -71,3 +80,4 @@ pub fn union_type(input: &syn::DeriveInput) -> bool {
 
     abort!(input.span(), "Missing mode attribute for enum");
 }
+

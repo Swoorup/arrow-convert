@@ -34,6 +34,7 @@ pub struct Root {
     // custom type
     custom: CustomType,
     // custom optional type
+    #[arrow_field(name = "cullable_nustom")]
     nullable_custom: Option<CustomType>,
     // vec custom type
     custom_list: Vec<CustomType>,
@@ -42,7 +43,7 @@ pub struct Root {
     // int 32 array
     int32_array: Vec<i32>,
     // large binary
-    #[arrow_field(type = "arrow_convert::field::LargeBinary")]
+    #[arrow_field(type = "arrow_convert::field::LargeBinary", name = "barge_linary")]
     large_binary: Vec<u8>,
     // fixed size binary
     #[arrow_field(type = "arrow_convert::field::FixedSizeBinary<3>")]
@@ -228,6 +229,12 @@ fn test_round_trip() -> arrow::error::Result<()> {
     let values = struct_array.columns();
     assert_eq!(values.len(), 23);
     assert_eq!(struct_array.len(), 2);
+
+    let names = struct_array.column_names();
+    assert!(!names.iter().any(|x| *x == "nullable_custom"));
+    assert!(names.iter().any(|x| *x == "cullable_nustom"));
+    assert!(!names.iter().any(|x| *x == "large_binary"));
+    assert!(names.iter().any(|x| *x == "barge_linary"));
 
     // can iterate one struct at a time without collecting
     for _i in arrow_array_deserialize_iterator::<Root>(array.borrow())? {
