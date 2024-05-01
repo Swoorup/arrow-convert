@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.6.7 (2024-05-01)
 
+<csr-id-566214e43993bb60277d1849383a88f1c4c9bd30/>
+
 ### Other
 
  - <csr-id-566214e43993bb60277d1849383a88f1c4c9bd30/> better no-fields error
@@ -15,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 13 commits contributed to the release over the course of 31 calendar days.
+ - 15 commits contributed to the release over the course of 33 calendar days.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Added changelogs ([`c50cd3b`](https://github.com/Swoorup/arrow-convert/commit/c50cd3b011d55c31afe6888023d5f9e53ef014b2))
+    - Release arrow_convert_derive v0.6.7, arrow_convert v0.6.7 ([`60d2ccc`](https://github.com/Swoorup/arrow-convert/commit/60d2ccc51055d4937866e4aa981a92a573fa54d6))
     - Merge pull request #6 from aldanor/feature/more-attrs ([`aa60656`](https://github.com/Swoorup/arrow-convert/commit/aa60656a69e6283e49fde75ce502500d4760e409))
     - Initial support for arrow_field(name = "...") ([`fa20bd4`](https://github.com/Swoorup/arrow-convert/commit/fa20bd4056c65c36b258896e9e020cc445c4ff45))
     - Better no-fields error ([`566214e`](https://github.com/Swoorup/arrow-convert/commit/566214e43993bb60277d1849383a88f1c4c9bd30))
