@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.6.8 (2024-06-10)
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 40 days passed between releases.
+ - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bump version ([`8105051`](https://github.com/Swoorup/arrow-convert/commit/8105051ce086b2fa847cd18c0e8245da172e8c35))
+    - Merge pull request #8 from Swoorup/sj-update-arrow ([`4ccca87`](https://github.com/Swoorup/arrow-convert/commit/4ccca876e62c2b65ec38ed788e0d22ffa7cdbc0a))
+    - Update `UnionArray::try_new` usage ([`aa7688f`](https://github.com/Swoorup/arrow-convert/commit/aa7688fc4a8be859b497d0f2e6fbcfb6b7abc6c2))
+</details>
+
 ## v0.6.7 (2024-05-01)
 
 <csr-id-566214e43993bb60277d1849383a88f1c4c9bd30/>
@@ -17,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 15 commits contributed to the release over the course of 33 calendar days.
+ - 16 commits contributed to the release over the course of 33 calendar days.
  - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -28,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release arrow_convert_derive v0.6.7, arrow_convert v0.6.7 ([`4ba848f`](https://github.com/Swoorup/arrow-convert/commit/4ba848fe6a91f4f4e3f1aafdbc14c1a834f28e40))
     - Added changelogs ([`c50cd3b`](https://github.com/Swoorup/arrow-convert/commit/c50cd3b011d55c31afe6888023d5f9e53ef014b2))
     - Release arrow_convert_derive v0.6.7, arrow_convert v0.6.7 ([`60d2ccc`](https://github.com/Swoorup/arrow-convert/commit/60d2ccc51055d4937866e4aa981a92a573fa54d6))
     - Merge pull request #6 from aldanor/feature/more-attrs ([`aa60656`](https://github.com/Swoorup/arrow-convert/commit/aa60656a69e6283e49fde75ce502500d4760e409))
