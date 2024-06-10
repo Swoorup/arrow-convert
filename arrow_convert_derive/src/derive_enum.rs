@@ -148,8 +148,8 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             quote! { offsets: Vec<i32>, },
             quote! { offsets: vec![], },
             quote! { self.offsets.reserve(additional); },
-            quote! { Some(arrow::buffer::Buffer::from_vec(std::mem::take(&mut self.offsets))) },
-            quote! { Some(arrow::buffer::Buffer::from_slice_ref(&self.offsets)) },
+            quote! { Some(arrow::buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.offsets))) },
+            quote! { Some(self.offsets.iter().cloned().collect::<arrow::buffer::ScalarBuffer<i32>>()) },
             quote! { self.offsets.shrink_to_fit(); },
         )
     } else {
@@ -244,11 +244,6 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             })
             .collect::<Vec<TokenStream>>();
 
-    let num_variants = syn::LitInt::new(
-        &format!("{}", variant_types.len()),
-        proc_macro2::Span::call_site(),
-    );
-
     let array_decl = quote! {
         #[allow(non_snake_case)]
         #[derive(Debug)]
@@ -258,15 +253,9 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             )*
             data_type: arrow::datatypes::DataType,
             type_ids: Vec<i8>,
-            field_type_ids: [i8; #num_variants],
             #offsets_decl
         }
     };
-
-    let field_type_ids_value = variant_indices
-        .iter()
-        .map(|idx| quote! {#idx})
-        .collect::<Vec<TokenStream>>();
 
     let array_impl = quote! {
         impl #mutable_array_name {
@@ -275,7 +264,6 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                     #(#variant_names: <#variant_types as arrow_convert::serialize::ArrowSerialize>::new_array(),)*
                     data_type: <#original_name as arrow_convert::field::ArrowField>::data_type(),
                     type_ids: vec![],
-                    field_type_ids: [ #( #field_type_ids_value ),* ],
                     #offsets_init
                 }
             }
@@ -378,22 +366,17 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                     panic!("datatype is not a union")
                   };
 
-                let values = [#(
+                let children = vec![#(
                     <#mutable_variant_array_types as arrow::array::ArrayBuilder>::finish(&mut self.#variant_names),
                 )*];
 
-                let child_arrays = union_fields.iter()
-                  .map(|(_, field)| field.as_ref().to_owned())
-                  .zip(values.into_iter())
-                  .collect::<Vec<_>>();
-
-                let type_ids = arrow::buffer::Buffer::from_vec(std::mem::take(&mut self.type_ids));
+                let type_ids = arrow::buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.type_ids));
 
                 std::sync::Arc::new(arrow::array::UnionArray::try_new(
-                    &self.field_type_ids,
+                    union_fields,
                     type_ids,
                     #offsets_take,
-                    child_arrays
+                    children
                 ).unwrap())
             }
 
@@ -404,22 +387,17 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                     panic!("datatype is not a union")
                   };
 
-                let values = [#(
+                let children = vec![#(
                     <#mutable_variant_array_types as arrow::array::ArrayBuilder>::finish_cloned(&self.#variant_names),
                 )*];
 
-                let child_arrays = union_fields.iter()
-                  .map(|(_, field)| field.as_ref().to_owned())
-                  .zip(values.into_iter())
-                  .collect::<Vec<_>>();
-
-                let type_ids = arrow::buffer::Buffer::from_slice_ref(&self.type_ids);
+                let type_ids = self.type_ids.iter().cloned().collect::<arrow::buffer::ScalarBuffer<i8>>();
 
                 std::sync::Arc::new(arrow::array::UnionArray::try_new(
-                    &self.field_type_ids,
+                    union_fields,
                     type_ids,
                     #offsets_clone,
-                    child_arrays
+                    children
                 ).unwrap())
             }
 
