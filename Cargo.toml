@@ -1,10 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
-    "arrow_convert",
-    "arrow_convert_derive",
-    "examples/simple"
-]
+members = ["arrow_convert", "arrow_convert_derive", "examples/simple"]
 
 [workspace.package]
 authors = [
@@ -12,6 +8,7 @@ authors = [
   "Jorge Leitao <jorgecarleitao@gmail.com>",
   "Chandra Penke <chandrapenke@gmail.com>",
 ]
+version = "0.7.0"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 keywords = ["Arrow", "arrow"]
@@ -19,15 +16,15 @@ repository = "https://github.com/Swoorup/arrow-convert"
 
 [workspace.dependencies]
 # workspace crates
-arrow_convert = { path = "arrow_convert", version = "0.6.5" }
-arrow_convert_derive = { path = "arrow_convert_derive", version = "0.6.5" }
+arrow_convert = { path = "arrow_convert", version = "0.7.0" }
+arrow_convert_derive = { path = "arrow_convert_derive", version = "0.7.0" }
 
-arrow = "52.0"
+arrow = "53.0"
 chrono = { version = "0.4", default-features = false }
 criterion = "0.5"
 err-derive = "0.3"
-half = { version = "2.1", default-features = false }
-proc-macro-error = "1"
+half = { version = "2.4", default-features = false }
+proc-macro-error2 = "2"
 proc-macro2 = "1"
 quote = "1"
 syn = "2"

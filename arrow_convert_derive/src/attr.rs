@@ -1,4 +1,4 @@
-use proc_macro_error::{abort, ResultExt};
+use proc_macro_error2::{abort, ResultExt};
 use syn::spanned::Spanned;
 use syn::{Lit, Meta, MetaNameValue};
 

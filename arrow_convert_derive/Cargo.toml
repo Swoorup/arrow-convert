@@ -1,6 +1,6 @@
 [package]
 name = "arrow_convert_derive"
-version= "0.6.8"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -15,4 +15,4 @@ proc-macro = true
 syn = { workspace = true, features = ["full"] }
 quote = { workspace = true }
 proc-macro2 = { workspace = true }
-proc-macro-error = { workspace = true }
+proc-macro-error2 = { workspace = true }
