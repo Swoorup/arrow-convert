@@ -1,6 +1,6 @@
 [package]
 name = "arrow_convert"
-version= "0.6.8"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
