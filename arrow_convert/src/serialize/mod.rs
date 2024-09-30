@@ -2,7 +2,6 @@
 
 use arrow::datatypes::ArrowNativeType;
 use arrow::{array::*, datatypes};
-// use arrow::datatypes::ArrowNativeType;
 use arrow::buffer::{Buffer, ScalarBuffer};
 use chrono::{NaiveDate, NaiveDateTime};
 use std::sync::Arc;
