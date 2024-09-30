@@ -116,6 +116,22 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
         ..
     } = (&input).into();
 
+    let arrow_schema_impl = if input.fields.len() == 1 && input.is_transparent {
+        quote! {}
+    } else {
+        quote! {
+          impl #original_name {
+            pub fn arrow_schema() -> arrow::datatypes::Schema {
+                arrow::datatypes::Schema::new(vec![
+                    #(
+                        <#field_types as arrow_convert::field::ArrowField>::field(#field_names),
+                    )*
+                ])
+            }
+          }
+        }
+    };
+
     let data_type_impl = {
         if input.fields.len() == 1 && input.is_transparent {
             // Special case for single-field (tuple) structs
@@ -125,17 +141,13 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
                 <#ty as arrow_convert::field::ArrowField>::data_type()
             )
         } else {
-            quote!(arrow::datatypes::DataType::Struct(
-                arrow::datatypes::Fields::from(vec![
-                    #(
-                        <#field_types as arrow_convert::field::ArrowField>::field(#field_names),
-                    )*
-                ])
-            ))
+            quote!(arrow::datatypes::DataType::Struct(Self::arrow_schema().fields))
         }
     };
 
     quote!(
+        #arrow_schema_impl
+
         impl arrow_convert::field::ArrowField for #original_name {
             type Type = Self;
 

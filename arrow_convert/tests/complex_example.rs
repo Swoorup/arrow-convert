@@ -1,5 +1,7 @@
 use arrow::array::*;
+use arrow::datatypes::DataType;
 use arrow_convert::deserialize::{arrow_array_deserialize_iterator, TryIntoCollection};
+use arrow_convert::field::ArrowField;
 use arrow_convert::serialize::TryIntoArrow;
 /// Complex example that uses the following features:
 ///
@@ -220,15 +222,19 @@ fn test_round_trip() -> arrow::error::Result<()> {
     let original_array = [item1(), item2()];
 
     let array: ArrayRef = original_array.try_into_arrow()?;
-    let struct_array = array
-        .as_any()
-        .downcast_ref::<arrow::array::StructArray>()
-        .unwrap();
+
+    let struct_array = array.as_any().downcast_ref::<arrow::array::StructArray>().unwrap();
     assert_eq!(struct_array.len(), 2);
 
     let values = struct_array.columns();
     assert_eq!(values.len(), 23);
     assert_eq!(struct_array.len(), 2);
+
+    let DataType::Struct(fields) = Root::data_type() else {
+        panic!("Should be a struct")
+    };
+
+    assert_eq!(fields, Root::arrow_schema().fields);
 
     let names = struct_array.column_names();
     assert!(!names.iter().any(|x| *x == "nullable_custom"));
