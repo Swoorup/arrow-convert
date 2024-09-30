@@ -3,8 +3,7 @@ use std::sync::Arc;
 /// Simple example
 use arrow::array::Array;
 use arrow_convert::{
-    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField,
-    ArrowSerialize,
+    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField, ArrowSerialize,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, ArrowField, ArrowSerialize, ArrowDeserialize)]

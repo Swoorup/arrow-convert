@@ -191,11 +191,7 @@ impl DeriveStruct {
 
         DeriveStruct {
             common,
-            fields: ast
-                .fields
-                .iter()
-                .map(DeriveField::from_ast)
-                .collect::<Vec<_>>(),
+            fields: ast.fields.iter().map(DeriveField::from_ast).collect::<Vec<_>>(),
             is_transparent,
         }
     }
@@ -208,11 +204,7 @@ impl DeriveEnum {
 
         DeriveEnum {
             common,
-            variants: ast
-                .variants
-                .iter()
-                .map(DeriveVariant::from_ast)
-                .collect::<Vec<_>>(),
+            variants: ast.variants.iter().map(DeriveVariant::from_ast).collect::<Vec<_>>(),
             is_dense: container_attrs
                 .is_dense
                 .unwrap_or_else(|| abort!(input.span(), "Missing mode attribute for enum")),

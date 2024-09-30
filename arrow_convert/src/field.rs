@@ -338,12 +338,6 @@ impl<T> ArrowEnableVecForType for Option<T> where T: ArrowField + ArrowEnableVec
 
 // Blanket implementation for Vec<Vec<T>> and Vec<Buffer<T>> if vectors or buffers are enabled for T
 impl<T> ArrowEnableVecForType for Vec<T> where T: ArrowField + ArrowEnableVecForType {}
-impl<T> ArrowEnableVecForType for ScalarBuffer<T> where
-    T: ArrowField + ArrowEnableVecForType + ArrowNativeType
-{
-}
+impl<T> ArrowEnableVecForType for ScalarBuffer<T> where T: ArrowField + ArrowEnableVecForType + ArrowNativeType {}
 impl<T> ArrowEnableVecForType for LargeVec<T> where T: ArrowField + ArrowEnableVecForType {}
-impl<T, const SIZE: i32> ArrowEnableVecForType for FixedSizeVec<T, SIZE> where
-    T: ArrowField + ArrowEnableVecForType
-{
-}
+impl<T, const SIZE: i32> ArrowEnableVecForType for FixedSizeVec<T, SIZE> where T: ArrowField + ArrowEnableVecForType {}

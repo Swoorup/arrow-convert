@@ -26,10 +26,7 @@ pub trait ArrowSerialize: ArrowField {
     fn new_array() -> Self::ArrayBuilderType;
 
     /// Serialize this field to arrow
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()>;
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()>;
 }
 
 // Macro to facilitate implementation of serializable traits for numeric types and numeric mutable arrays.
@@ -44,10 +41,7 @@ macro_rules! impl_numeric_type {
             }
 
             #[inline]
-            fn arrow_serialize(
-                v: &Self,
-                array: &mut Self::ArrayBuilderType,
-            ) -> arrow::error::Result<()> {
+            fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
                 array.append_option(Some(*v));
                 Ok(())
             }
@@ -69,10 +63,7 @@ where
     }
 
     #[inline]
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         match v.as_ref() {
             Some(t) => <T as ArrowSerialize>::arrow_serialize(t, array),
             None => {
@@ -256,10 +247,7 @@ impl ArrowSerialize for LargeBinary {
     }
 
     #[inline]
-    fn arrow_serialize(
-        v: &Vec<u8>,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &Vec<u8>, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         array.append_option(Some(v));
         Ok(())
     }
@@ -274,10 +262,7 @@ impl<const SIZE: i32> ArrowSerialize for FixedSizeBinary<SIZE> {
     }
 
     #[inline]
-    fn arrow_serialize(
-        v: &Vec<u8>,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &Vec<u8>, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         array.append_value(v)
     }
 }
@@ -310,10 +295,7 @@ where
     }
 
     #[inline]
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         let values = array.values();
         for i in v.iter() {
             <T as ArrowSerialize>::arrow_serialize(i, values)?;
@@ -337,10 +319,7 @@ where
         ListBuilder::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         let values = array.values();
         for i in v.iter() {
             <T as ArrowSerialize>::arrow_serialize(i, values)?;
@@ -363,10 +342,7 @@ where
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         let values = array.values();
         for i in v.iter() {
             <T as ArrowSerialize>::arrow_serialize(i, values)?;
@@ -389,10 +365,7 @@ where
             .with_field(<T as ArrowField>::field(DEFAULT_FIELD_NAME))
     }
 
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         let values = array.values();
         for i in v.iter() {
             <T as ArrowSerialize>::arrow_serialize(i, values)?;
@@ -415,10 +388,7 @@ where
             .with_field(<T as ArrowField>::field(DEFAULT_FIELD_NAME))
     }
 
-    fn arrow_serialize(
-        v: &<Self as ArrowField>::Type,
-        array: &mut Self::ArrayBuilderType,
-    ) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &<Self as ArrowField>::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         let values = array.values();
         for i in v.iter() {
             <T as ArrowSerialize>::arrow_serialize(i, values)?;
@@ -483,16 +453,11 @@ impl FlattenRecordBatch for RecordBatch {
         let data_type = array.as_ref().data_type();
         if !matches!(data_type, arrow::datatypes::DataType::Struct(_)) {
             return Err(arrow::error::ArrowError::InvalidArgumentError(
-                "Array in RecordBatch must be of type arrow::datatypes::PhysicalType::Struct"
-                    .to_string(),
+                "Array in RecordBatch must be of type arrow::datatypes::PhysicalType::Struct".to_string(),
             ));
         }
 
-        let struct_array = array
-            .as_ref()
-            .as_any()
-            .downcast_ref::<StructArray>()
-            .unwrap();
+        let struct_array = array.as_ref().as_any().downcast_ref::<StructArray>().unwrap();
         Ok(RecordBatch::from(struct_array))
     }
 }

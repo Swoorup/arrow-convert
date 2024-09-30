@@ -31,16 +31,10 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
             quote!(arrow::datatypes::UnionMode::Sparse)
         };
 
-        let variant_names = variants
-            .iter()
-            .map(|v| v.syn.ident.clone())
-            .collect::<Vec<_>>();
+        let variant_names = variants.iter().map(|v| v.syn.ident.clone()).collect::<Vec<_>>();
 
         if variant_names.is_empty() {
-            abort!(
-                original_name.span(),
-                "Expected enum to have at least one field"
-            );
+            abort!(original_name.span(), "Expected enum to have at least one field");
         }
 
         let variant_names_str = variant_names
@@ -51,9 +45,7 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
         let variant_indices = variant_names
             .iter()
             .enumerate()
-            .map(|(idx, _ident)| {
-                syn::LitInt::new(&format!("{idx}"), proc_macro2::Span::call_site())
-            })
+            .map(|(idx, _ident)| syn::LitInt::new(&format!("{idx}"), proc_macro2::Span::call_site()))
             .collect::<Vec<_>>();
 
         let variant_types: Vec<&syn::Type> = variants
@@ -136,14 +128,8 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
         .map(|field_type| quote_spanned!( field_type.span() => <#field_type as arrow_convert::serialize::ArrowSerialize>::ArrayBuilderType))
         .collect::<Vec<TokenStream>>();
 
-    let (
-        offsets_decl,
-        offsets_init,
-        offsets_reserve,
-        offsets_take,
-        offsets_clone,
-        offsets_shrink_to_fit,
-    ) = if is_dense {
+    let (offsets_decl, offsets_init, offsets_reserve, offsets_take, offsets_clone, offsets_shrink_to_fit) = if is_dense
+    {
         (
             quote! { offsets: Vec<i32>, },
             quote! { offsets: vec![], },

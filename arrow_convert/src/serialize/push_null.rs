@@ -1,8 +1,8 @@
 use arrow::{
     array::{
         ArrayBuilder, BinaryBuilder, BooleanBufferBuilder, BooleanBuilder, FixedSizeBinaryBuilder,
-        FixedSizeListBuilder, LargeBinaryBuilder, LargeListBuilder, LargeStringBuilder,
-        ListBuilder, PrimitiveBuilder, StringBuilder,
+        FixedSizeListBuilder, LargeBinaryBuilder, LargeListBuilder, LargeStringBuilder, ListBuilder, PrimitiveBuilder,
+        StringBuilder,
     },
     datatypes::ArrowPrimitiveType,
 };

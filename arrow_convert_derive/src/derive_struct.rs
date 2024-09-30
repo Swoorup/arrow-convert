@@ -21,8 +21,7 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
         let original_name = &input.common.name;
         let visibility = &input.common.visibility;
 
-        let (skipped_fields, fields): (Vec<_>, Vec<_>) =
-            input.fields.iter().partition(|field| field.skip);
+        let (skipped_fields, fields): (Vec<_>, Vec<_>) = input.fields.iter().partition(|field| field.skip);
         if fields.is_empty() {
             abort!(
                 original_name.span(),
@@ -68,9 +67,7 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
         let field_indices = field_members
             .iter()
             .enumerate()
-            .map(|(idx, _ident)| {
-                syn::LitInt::new(&format!("{idx}"), proc_macro2::Span::call_site())
-            })
+            .map(|(idx, _ident)| syn::LitInt::new(&format!("{idx}"), proc_macro2::Span::call_site()))
             .collect::<Vec<_>>();
 
         let field_types: Vec<&syn::Type> = fields
@@ -88,9 +85,9 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             .enumerate()
             .map(
                 |(id, field)| match (field.field_name.as_ref(), field.syn.ident.as_ref()) {
-                    (Some(name), _) => name.to_owned(), // override enabled
+                    (Some(name), _) => name.to_owned(),                         // override enabled
                     (_, Some(ident)) => format_ident!("{}", ident).to_string(), // no override, named field
-                    (_, None) => format!("field_{id}"), // no override, unnamed field
+                    (_, None) => format!("field_{id}"),                         // no override, unnamed field
                 },
             )
             .collect::<Vec<_>>();

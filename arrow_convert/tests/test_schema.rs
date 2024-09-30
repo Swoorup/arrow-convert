@@ -195,11 +195,7 @@ fn test_schema_types() {
                                 ),
                                 Field::new(
                                     "int64_array",
-                                    DataType::List(Arc::new(Field::new(
-                                        DEFAULT_FIELD_NAME,
-                                        DataType::Int64,
-                                        false
-                                    ))),
+                                    DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false))),
                                     false
                                 ),
                             ])),
@@ -227,7 +223,10 @@ fn test_schema_types() {
             ),
             Field::new(
                 "fixed_size_vec",
-                DataType::FixedSizeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false)), 3),
+                DataType::FixedSizeList(
+                    Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false)),
+                    3
+                ),
                 false
             ),
         ]))
@@ -247,6 +246,10 @@ fn test_large_string_schema() {
 
     assert_eq!(
         <Vec<LargeString> as arrow_convert::field::ArrowField>::data_type(),
-        DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::LargeUtf8, false)))
+        DataType::List(Arc::new(Field::new(
+            DEFAULT_FIELD_NAME,
+            DataType::LargeUtf8,
+            false
+        )))
     );
 }

@@ -82,14 +82,7 @@ fn test_deserialize_large_types_schema_mismatch_error() {
         a: String,
     }
 
-    let arr1 = vec![
-        S1 {
-            a: "123".to_string(),
-        },
-        S1 {
-            a: "333".to_string(),
-        },
-    ];
+    let arr1 = vec![S1 { a: "123".to_string() }, S1 { a: "333".to_string() }];
     let arr1: ArrayRef = arr1.try_into_arrow().unwrap();
 
     let result: Result<Vec<S2>> = arr1.try_into_collection();
@@ -110,10 +103,7 @@ fn test_deserialize_scalar_buffer_u16() {
     }
 
     // test ScalarBuffer<u8>
-    let original_array = [
-        ScalarBuffer::from_iter(0u16..5),
-        ScalarBuffer::from_iter(7..9),
-    ];
+    let original_array = [ScalarBuffer::from_iter(0u16..5), ScalarBuffer::from_iter(7..9)];
     let b: ArrayRef = original_array.try_into_arrow().unwrap();
     let iter = arrow_array_deserialize_iterator::<ScalarBuffer<u16>>(b.as_ref()).unwrap();
     for (i, k) in iter.zip(original_array.iter()) {
@@ -123,10 +113,7 @@ fn test_deserialize_scalar_buffer_u16() {
 
 #[test]
 fn test_deserialize_scalar_buffer_u8() {
-    let original_array = [
-        ScalarBuffer::from_iter(0u8..5),
-        ScalarBuffer::from_iter(7..9),
-    ];
+    let original_array = [ScalarBuffer::from_iter(0u8..5), ScalarBuffer::from_iter(7..9)];
     let b: ArrayRef = original_array.try_into_arrow().unwrap();
     let iter = arrow_array_deserialize_iterator::<ScalarBuffer<u8>>(b.as_ref()).unwrap();
     for (i, k) in iter.zip(original_array.iter()) {

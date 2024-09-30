@@ -20,9 +20,7 @@ where
     type ArrayType;
 
     /// Deserialize this field from arrow
-    fn arrow_deserialize(
-        v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>,
-    ) -> Option<<Self as ArrowField>::Type>;
+    fn arrow_deserialize(v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>) -> Option<<Self as ArrowField>::Type>;
 
     #[inline]
     #[doc(hidden)]
@@ -32,9 +30,7 @@ where
     /// Ideally we would be able to capture the optional field of the iterator via
     /// something like  T::ArrayType: ArrowArrayIterable<Item=Option<E>>,
     /// However, the E parameter seems to confuse the borrow checker if it's a reference.
-    fn arrow_deserialize_internal(
-        v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>,
-    ) -> <Self as ArrowField>::Type {
+    fn arrow_deserialize_internal(v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>) -> <Self as ArrowField>::Type {
         Self::arrow_deserialize(v).unwrap()
     }
 }
@@ -62,9 +58,7 @@ macro_rules! impl_arrow_deserialize_primitive {
             type ArrayType = PrimitiveArray<$primitive_type>;
 
             #[inline]
-            fn arrow_deserialize<'a>(
-                v: Option<<$primitive_type as ArrowPrimitiveType>::Native>,
-            ) -> Option<Self> {
+            fn arrow_deserialize<'a>(v: Option<<$primitive_type as ArrowPrimitiveType>::Native>) -> Option<Self> {
                 v
             }
         }
@@ -97,16 +91,12 @@ where
     type ArrayType = <T as ArrowDeserialize>::ArrayType;
 
     #[inline]
-    fn arrow_deserialize(
-        v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>,
-    ) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>) -> Option<<Self as ArrowField>::Type> {
         Self::arrow_deserialize_internal(v).map(Some)
     }
 
     #[inline]
-    fn arrow_deserialize_internal(
-        v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>,
-    ) -> <Self as ArrowField>::Type {
+    fn arrow_deserialize_internal(v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>) -> <Self as ArrowField>::Type {
         <T as ArrowDeserialize>::arrow_deserialize(v)
     }
 }
@@ -270,9 +260,7 @@ impl<const SIZE: usize> ArrowDeserialize for [u8; SIZE] {
     }
 }
 
-pub(crate) fn arrow_deserialize_vec_helper<T>(
-    v: Option<ArrayRef>,
-) -> Option<<Vec<T> as ArrowField>::Type>
+pub(crate) fn arrow_deserialize_vec_helper<T>(v: Option<ArrayRef>) -> Option<<Vec<T> as ArrowField>::Type>
 where
     T: ArrowDeserialize + ArrowEnableVecForType + 'static,
     T::ArrayType: ArrowArrayIterable,
@@ -294,16 +282,9 @@ where
     type ArrayType = ListArray;
 
     #[inline]
-    fn arrow_deserialize(
-        v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>,
-    ) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: <Self::ArrayType as ArrowArrayIterable>::Item<'_>) -> Option<<Self as ArrowField>::Type> {
         let t = v?;
-        let array = t
-            .as_any()
-            .downcast_ref::<PrimitiveArray<K>>()
-            .unwrap()
-            .values()
-            .clone();
+        let array = t.as_any().downcast_ref::<PrimitiveArray<K>>().unwrap().values().clone();
         Some(array)
     }
 }
@@ -403,9 +384,7 @@ where
 }
 
 /// Helper to return an iterator for elements from a [`arrow::array::Array`].
-fn arrow_array_deserialize_iterator_internal<Element, Field>(
-    b: &dyn Array,
-) -> impl Iterator<Item = Element> + '_
+fn arrow_array_deserialize_iterator_internal<Element, Field>(b: &dyn Array) -> impl Iterator<Item = Element> + '_
 where
     Field: ArrowDeserialize + ArrowField<Type = Element> + 'static,
     <Field as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
@@ -432,17 +411,14 @@ where
             arr.is_nullable()
         )))
     } else {
-        Ok(arrow_array_deserialize_iterator_internal::<
-            Element,
-            ArrowType,
-        >(arr))
+        Ok(arrow_array_deserialize_iterator_internal::<Element, ArrowType>(
+            arr,
+        ))
     }
 }
 
 /// Return an iterator that deserializes an [`Array`] to an element of type T
-pub fn arrow_array_deserialize_iterator<T>(
-    arr: &dyn Array,
-) -> arrow::error::Result<impl Iterator<Item = T> + '_>
+pub fn arrow_array_deserialize_iterator<T>(arr: &dyn Array) -> arrow::error::Result<impl Iterator<Item = T> + '_>
 where
     T: ArrowDeserialize + ArrowField<Type = T> + 'static,
     <T as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
@@ -469,9 +445,6 @@ where
         ArrowType: ArrowDeserialize + ArrowField<Type = Element> + 'static,
         <ArrowType as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
     {
-        Ok(
-            arrow_array_deserialize_iterator_as_type::<Element, ArrowType>(self.borrow())?
-                .collect(),
-        )
+        Ok(arrow_array_deserialize_iterator_as_type::<Element, ArrowType>(self.borrow())?.collect())
     }
 }

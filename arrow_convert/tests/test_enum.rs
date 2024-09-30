@@ -1,7 +1,6 @@
 use arrow::{array::*, datatypes::*};
 use arrow_convert::{
-    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField,
-    ArrowSerialize,
+    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField, ArrowSerialize,
 };
 use pretty_assertions::assert_eq;
 
@@ -16,12 +15,7 @@ fn test_dense_enum_unit_variant() {
         VAL4,
     }
 
-    let enums = vec![
-        TestEnum::VAL1,
-        TestEnum::VAL2,
-        TestEnum::VAL3,
-        TestEnum::VAL4,
-    ];
+    let enums = vec![TestEnum::VAL1, TestEnum::VAL2, TestEnum::VAL3, TestEnum::VAL4];
     let b: ArrayRef = enums.try_into_arrow().unwrap();
     assert_eq!(
         b.data_type(),
@@ -53,12 +47,7 @@ fn test_sparse_enum_unit_variant() {
         VAL4,
     }
 
-    let enums = vec![
-        TestEnum::VAL1,
-        TestEnum::VAL2,
-        TestEnum::VAL3,
-        TestEnum::VAL4,
-    ];
+    let enums = vec![TestEnum::VAL1, TestEnum::VAL2, TestEnum::VAL3, TestEnum::VAL4];
     let b: ArrayRef = enums.try_into_arrow().unwrap();
     assert_eq!(
         b.data_type(),

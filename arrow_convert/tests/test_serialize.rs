@@ -34,10 +34,7 @@ fn test_array() {
     let strs = [b"abc".to_vec()];
     let r: ArrayRef = strs.try_into_arrow_as_type::<FixedSizeBinary<3>>().unwrap();
     assert_eq!(r.len(), 1);
-    assert_eq!(
-        r.data_type(),
-        &<FixedSizeBinary<3> as ArrowField>::data_type()
-    );
+    assert_eq!(r.data_type(), &<FixedSizeBinary<3> as ArrowField>::data_type());
 
     let r: ArrayRef = strs.try_into_arrow().unwrap();
     assert_eq!(r.len(), 1);
@@ -54,20 +51,14 @@ fn test_buffer() {
     assert_eq!(rb.len(), 1);
     assert_eq!(r.len(), 1);
     assert_eq!(r.data_type(), &<Buffer as ArrowField>::data_type());
-    assert_eq!(
-        r.data_type(),
-        &<ScalarBuffer<u8> as ArrowField>::data_type()
-    );
+    assert_eq!(r.data_type(), &<ScalarBuffer<u8> as ArrowField>::data_type());
     assert_eq!(r.data_type(), &<Vec<u8> as ArrowField>::data_type());
 
     // ScalarBuffer<u16> and Vec<u16> should serialize into ListArray
     let dat: Vec<ScalarBuffer<u16>> = vec![(0..10).collect()];
     let r: ArrayRef = dat.try_into_arrow().unwrap();
     assert_eq!(r.len(), 1);
-    assert_eq!(
-        r.data_type(),
-        &<ScalarBuffer<u16> as ArrowField>::data_type()
-    );
+    assert_eq!(r.data_type(), &<ScalarBuffer<u16> as ArrowField>::data_type());
     assert_eq!(r.data_type(), &<Vec<u16> as ArrowField>::data_type());
 }
 

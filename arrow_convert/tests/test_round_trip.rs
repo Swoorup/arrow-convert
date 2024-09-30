@@ -61,7 +61,11 @@ fn test_large_string_nested() {
     let b: ArrayRef = strs.try_into_arrow_as_type::<Vec<LargeString>>().unwrap();
     assert_eq!(
         b.data_type(),
-        &DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::LargeUtf8, false)))
+        &DataType::List(Arc::new(Field::new(
+            DEFAULT_FIELD_NAME,
+            DataType::LargeUtf8,
+            false
+        )))
     );
     let round_trip: Vec<Vec<String>> = b.try_into_collection_as_type::<Vec<LargeString>>().unwrap();
     assert_eq!(round_trip, strs);
@@ -82,10 +86,13 @@ fn test_large_binary_nested() {
     let b: ArrayRef = strs.try_into_arrow_as_type::<Vec<LargeBinary>>().unwrap();
     assert_eq!(
         b.data_type(),
-        &DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::LargeBinary, false)))
+        &DataType::List(Arc::new(Field::new(
+            DEFAULT_FIELD_NAME,
+            DataType::LargeBinary,
+            false
+        )))
     );
-    let round_trip: Vec<Vec<Vec<u8>>> =
-        b.try_into_collection_as_type::<Vec<LargeBinary>>().unwrap();
+    let round_trip: Vec<Vec<Vec<u8>>> = b.try_into_collection_as_type::<Vec<LargeBinary>>().unwrap();
     assert_eq!(round_trip, strs);
 }
 
@@ -94,9 +101,7 @@ fn test_fixed_size_binary() {
     let strs = [b"abc".to_vec()];
     let b: ArrayRef = strs.try_into_arrow_as_type::<FixedSizeBinary<3>>().unwrap();
     assert_eq!(b.data_type(), &DataType::FixedSizeBinary(3));
-    let round_trip: Vec<Vec<u8>> = b
-        .try_into_collection_as_type::<FixedSizeBinary<3>>()
-        .unwrap();
+    let round_trip: Vec<Vec<u8>> = b.try_into_collection_as_type::<FixedSizeBinary<3>>().unwrap();
     assert_eq!(round_trip, strs);
 }
 
@@ -115,32 +120,31 @@ fn test_large_vec() {
 #[test]
 fn test_large_vec_nested() {
     let strs = [vec![b"abc".to_vec(), b"abd".to_vec()]];
-    let b: ArrayRef = strs
-        .try_into_arrow_as_type::<LargeVec<LargeBinary>>()
-        .unwrap();
+    let b: ArrayRef = strs.try_into_arrow_as_type::<LargeVec<LargeBinary>>().unwrap();
     assert_eq!(
         b.data_type(),
-        &DataType::LargeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::LargeBinary, false)))
+        &DataType::LargeList(Arc::new(Field::new(
+            DEFAULT_FIELD_NAME,
+            DataType::LargeBinary,
+            false
+        )))
     );
-    let round_trip: Vec<Vec<Vec<u8>>> = b
-        .try_into_collection_as_type::<LargeVec<LargeBinary>>()
-        .unwrap();
+    let round_trip: Vec<Vec<Vec<u8>>> = b.try_into_collection_as_type::<LargeVec<LargeBinary>>().unwrap();
     assert_eq!(round_trip, strs);
 }
 
 #[test]
 fn test_fixed_size_vec() {
     let ints = vec![vec![1, 2, 3]];
-    let b: ArrayRef = ints
-        .try_into_arrow_as_type::<FixedSizeVec<i32, 3>>()
-        .unwrap();
+    let b: ArrayRef = ints.try_into_arrow_as_type::<FixedSizeVec<i32, 3>>().unwrap();
     assert_eq!(
         b.data_type(),
-        &DataType::FixedSizeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int32, false)), 3)
+        &DataType::FixedSizeList(
+            Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int32, false)),
+            3
+        )
     );
-    let round_trip: Vec<Vec<i32>> = b
-        .try_into_collection_as_type::<FixedSizeVec<i32, 3>>()
-        .unwrap();
+    let round_trip: Vec<Vec<i32>> = b.try_into_collection_as_type::<FixedSizeVec<i32, 3>>().unwrap();
     assert_eq!(round_trip, ints);
 }
 
@@ -160,8 +164,7 @@ fn test_primitive_type_vec() {
 
             let original_array = vec![Some(1 as $t), None, Some(3)];
             let b: Arc<dyn Array> = original_array.try_into_arrow().unwrap();
-            let round_trip: Vec<Option<$t>> =
-                b.try_into_collection_as_type::<Option<$t>>().unwrap();
+            let round_trip: Vec<Option<$t>> = b.try_into_collection_as_type::<Option<$t>>().unwrap();
             assert_eq!(original_array, round_trip);
         };
     }
@@ -243,10 +246,9 @@ fn test_primitive_type_vec() {
             .unwrap()
             .finish(),
     );
-    let round_trip: Vec<Option<i128>> =
-        arrow_array_deserialize_iterator_as_type::<_, Option<I128<32, 32>>>(&b)
-            .unwrap()
-            .collect();
+    let round_trip: Vec<Option<i128>> = arrow_array_deserialize_iterator_as_type::<_, Option<I128<32, 32>>>(&b)
+        .unwrap()
+        .collect();
     assert_eq!(original_array, round_trip);
 
     // bool
