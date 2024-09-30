@@ -8,7 +8,7 @@ authors = [
   "Jorge Leitao <jorgecarleitao@gmail.com>",
   "Chandra Penke <chandrapenke@gmail.com>",
 ]
-version = "0.7.0"
+version = "0.7.1"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 keywords = ["Arrow", "arrow"]
@@ -16,8 +16,8 @@ repository = "https://github.com/Swoorup/arrow-convert"
 
 [workspace.dependencies]
 # workspace crates
-arrow_convert = { path = "arrow_convert", version = "0.7.0" }
-arrow_convert_derive = { path = "arrow_convert_derive", version = "0.7.0" }
+arrow_convert = { path = "arrow_convert", version = "0.7.1" }
+arrow_convert_derive = { path = "arrow_convert_derive", version = "0.7.1" }
 
 arrow = "53.0"
 chrono = { version = "0.4", default-features = false }

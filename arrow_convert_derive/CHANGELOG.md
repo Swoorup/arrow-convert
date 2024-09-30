@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1](https://github.com/Swoorup/arrow-convert/compare/arrow_convert_derive-v0.7.0...arrow_convert_derive-v0.7.1) - 2024-09-30
+
+### Other
+
+- Introduce rustfmt.toml for consistent formatting
+- Expose `arrow_schema` on structs with >1 column
+
 ## v0.6.8 (2024-06-10)
 
 ### Commit Statistics
