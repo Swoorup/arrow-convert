@@ -386,6 +386,7 @@ where
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array(), SIZE)
+            .with_field(<T as ArrowField>::field("item"))
     }
 
     fn arrow_serialize(
@@ -411,6 +412,7 @@ where
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array(), SIZE as i32)
+            .with_field(<T as ArrowField>::field("item"))
     }
 
     fn arrow_serialize(

@@ -135,7 +135,7 @@ fn test_fixed_size_vec() {
         .unwrap();
     assert_eq!(
         b.data_type(),
-        &DataType::FixedSizeList(Arc::new(Field::new("item", DataType::Int32, true)), 3)
+        &DataType::FixedSizeList(Arc::new(Field::new("item", DataType::Int32, false)), 3)
     );
     let round_trip: Vec<Vec<i32>> = b
         .try_into_collection_as_type::<FixedSizeVec<i32, 3>>()

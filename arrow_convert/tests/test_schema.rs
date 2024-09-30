@@ -227,7 +227,7 @@ fn test_schema_types() {
             ),
             Field::new(
                 "fixed_size_vec",
-                DataType::FixedSizeList(Arc::new(Field::new("item", DataType::Int64, true)), 3),
+                DataType::FixedSizeList(Arc::new(Field::new("item", DataType::Int64, false)), 3),
                 false
             ),
         ]))

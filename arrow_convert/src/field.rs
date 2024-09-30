@@ -299,9 +299,9 @@ where
     type Type = Vec<<T as ArrowField>::Type>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        let field = Field::new("item", <T as ArrowField>::data_type(), true);
-        arrow::datatypes::DataType::FixedSizeList(Arc::new(field), SIZE)
+    fn data_type() -> DataType {
+        let field = <T as ArrowField>::field("item");
+        DataType::FixedSizeList(Arc::new(field), SIZE)
     }
 }
 
@@ -312,9 +312,9 @@ where
     type Type = [<T as ArrowField>::Type; SIZE];
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        let field = Field::new("item", <T as ArrowField>::data_type(), true);
-        arrow::datatypes::DataType::FixedSizeList(Arc::new(field), SIZE as i32)
+    fn data_type() -> DataType {
+        let field = <T as ArrowField>::field("item");
+        DataType::FixedSizeList(Arc::new(field), SIZE as i32)
     }
 }
 
