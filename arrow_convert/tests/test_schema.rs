@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use arrow::datatypes::*;
-use arrow_convert::ArrowField;
+use arrow_convert::{field::DEFAULT_FIELD_NAME, ArrowField};
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -138,7 +138,7 @@ fn test_schema_types() {
             Field::new(
                 "date_time_list",
                 DataType::List(Arc::new(Field::new(
-                    "item",
+                    DEFAULT_FIELD_NAME,
                     DataType::Timestamp(TimeUnit::Nanosecond, None),
                     false
                 ))),
@@ -146,12 +146,12 @@ fn test_schema_types() {
             ),
             Field::new(
                 "nullable_list",
-                DataType::List(Arc::new(Field::new("item", DataType::Utf8, true))),
+                DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Utf8, true))),
                 true
             ),
             Field::new(
                 "required_list",
-                DataType::List(Arc::new(Field::new("item", DataType::Utf8, true))),
+                DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Utf8, true))),
                 false
             ),
             // Field::new(
@@ -167,7 +167,7 @@ fn test_schema_types() {
             // Field::new(
             //     "custom_list",
             //     DataType::List(Arc::new(Field::new(
-            //         "item",
+            //         DEFAULT_FIELD_NAME,
             //         DataType::Extension("custom".to_string(), Arc::new(DataType::UInt64), None),
             //         false
             //     ))),
@@ -181,13 +181,13 @@ fn test_schema_types() {
                     Field::new(
                         "child_array",
                         DataType::List(Arc::new(Field::new(
-                            "item",
+                            DEFAULT_FIELD_NAME,
                             DataType::Struct(Fields::from(vec![
                                 Field::new("a1", DataType::Int32, false),
                                 Field::new(
                                     "bool_array",
                                     DataType::List(Arc::new(Field::new(
-                                        "item",
+                                        DEFAULT_FIELD_NAME,
                                         DataType::Boolean,
                                         false
                                     ))),
@@ -196,7 +196,7 @@ fn test_schema_types() {
                                 Field::new(
                                     "int64_array",
                                     DataType::List(Arc::new(Field::new(
-                                        "item",
+                                        DEFAULT_FIELD_NAME,
                                         DataType::Int64,
                                         false
                                     ))),
@@ -212,7 +212,7 @@ fn test_schema_types() {
             ),
             Field::new(
                 "int32_array",
-                DataType::List(Arc::new(Field::new("item", DataType::Int32, false))),
+                DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int32, false))),
                 false
             ),
             Field::new("large_binary", DataType::LargeBinary, false),
@@ -222,12 +222,12 @@ fn test_schema_types() {
             Field::new("area_name", DataType::Utf8, false),
             Field::new(
                 "large_vec",
-                DataType::LargeList(Arc::new(Field::new("item", DataType::Int64, false))),
+                DataType::LargeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false))),
                 false
             ),
             Field::new(
                 "fixed_size_vec",
-                DataType::FixedSizeList(Arc::new(Field::new("item", DataType::Int64, false)), 3),
+                DataType::FixedSizeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false)), 3),
                 false
             ),
         ]))
@@ -247,6 +247,6 @@ fn test_large_string_schema() {
 
     assert_eq!(
         <Vec<LargeString> as arrow_convert::field::ArrowField>::data_type(),
-        DataType::List(Arc::new(Field::new("item", DataType::LargeUtf8, false)))
+        DataType::List(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::LargeUtf8, false)))
     );
 }

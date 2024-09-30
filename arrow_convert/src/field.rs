@@ -8,6 +8,9 @@ use arrow::{
 };
 use chrono::{NaiveDate, NaiveDateTime};
 
+/// The default field name used when a specific name is not provided.
+pub const DEFAULT_FIELD_NAME: &str = "_item";
+
 /// Trait implemented by all types that can be used as an Arrow field.
 ///
 /// Implementations are provided for types already supported by the arrow crate:
@@ -253,7 +256,7 @@ where
 
     #[inline]
     fn data_type() -> DataType {
-        DataType::List(Arc::new(<T as ArrowField>::field("item")))
+        DataType::List(Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME)))
     }
 }
 
@@ -266,7 +269,7 @@ where
 
     #[inline]
     fn data_type() -> DataType {
-        DataType::List(Arc::new(<T as ArrowField>::field("item")))
+        DataType::List(Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME)))
     }
 }
 
@@ -283,7 +286,7 @@ where
 
     #[inline]
     fn data_type() -> DataType {
-        DataType::LargeList(Arc::new(<T as ArrowField>::field("item")))
+        DataType::LargeList(Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME)))
     }
 }
 
@@ -300,7 +303,7 @@ where
 
     #[inline]
     fn data_type() -> DataType {
-        let field = <T as ArrowField>::field("item");
+        let field = <T as ArrowField>::field(DEFAULT_FIELD_NAME);
         DataType::FixedSizeList(Arc::new(field), SIZE)
     }
 }
@@ -313,7 +316,7 @@ where
 
     #[inline]
     fn data_type() -> DataType {
-        let field = <T as ArrowField>::field("item");
+        let field = <T as ArrowField>::field(DEFAULT_FIELD_NAME);
         DataType::FixedSizeList(Arc::new(field), SIZE as i32)
     }
 }

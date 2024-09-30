@@ -305,7 +305,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(<T as ArrowField>::field("item"));
+        let field = Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME));
         ListBuilder::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
@@ -333,7 +333,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(<T as ArrowField>::field("item"));
+        let field = Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME));
         ListBuilder::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
@@ -359,7 +359,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(<T as ArrowField>::field("item"));
+        let field = Arc::new(<T as ArrowField>::field(DEFAULT_FIELD_NAME));
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
@@ -386,7 +386,7 @@ where
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array(), SIZE)
-            .with_field(<T as ArrowField>::field("item"))
+            .with_field(<T as ArrowField>::field(DEFAULT_FIELD_NAME))
     }
 
     fn arrow_serialize(
@@ -412,7 +412,7 @@ where
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array(), SIZE as i32)
-            .with_field(<T as ArrowField>::field("item"))
+            .with_field(<T as ArrowField>::field(DEFAULT_FIELD_NAME))
     }
 
     fn arrow_serialize(
