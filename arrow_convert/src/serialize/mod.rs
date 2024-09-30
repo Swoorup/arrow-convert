@@ -1,8 +1,8 @@
 //! Implementation and traits for serializing to Arrow.
 
+use arrow::buffer::{Buffer, ScalarBuffer};
 use arrow::datatypes::ArrowNativeType;
 use arrow::{array::*, datatypes};
-use arrow::buffer::{Buffer, ScalarBuffer};
 use chrono::{NaiveDate, NaiveDateTime};
 use std::sync::Arc;
 
