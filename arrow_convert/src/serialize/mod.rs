@@ -502,7 +502,9 @@ where
     Element: 'static,
 {
     /// Convert from any iterable collection into an `arrow::Array`
-    fn try_into_arrow(self) -> arrow::error::Result<ArrowArray>;
+    fn try_into_arrow(self) -> arrow::error::Result<ArrowArray>
+    where
+        Element: ArrowSerialize + ArrowField<Type = Element> + 'static;
 
     /// Convert from any iterable collection into an `arrow::Array` by coercing the conversion to a specific Arrow type.
     /// This is useful when the same rust type maps to one or more Arrow types for example `LargeString`.
@@ -513,10 +515,13 @@ where
 
 impl<'a, Element, Collection> TryIntoArrow<'a, ArrayRef, Element> for Collection
 where
-    Element: ArrowSerialize + ArrowField<Type = Element> + 'static,
+    Element: 'static,
     Collection: IntoIterator<Item = &'a Element>,
 {
-    fn try_into_arrow(self) -> arrow::error::Result<ArrayRef> {
+    fn try_into_arrow(self) -> arrow::error::Result<ArrayRef>
+    where
+        Element: ArrowSerialize + ArrowField<Type = Element> + 'static,
+    {
         Ok(arrow_serialize_to_mutable_array::<Element, Element, Collection>(self)?.finish())
     }
 
@@ -530,10 +535,13 @@ where
 
 impl<'a, Element, Collection> TryIntoArrow<'a, RecordBatch, Element> for Collection
 where
-    Element: ArrowSerialize + ArrowField<Type = Element> + 'static,
+    Element: 'static,
     Collection: IntoIterator<Item = &'a Element>,
 {
-    fn try_into_arrow(self) -> arrow::error::Result<RecordBatch> {
+    fn try_into_arrow(self) -> arrow::error::Result<RecordBatch>
+    where
+        Element: ArrowSerialize + ArrowField<Type = Element> + 'static,
+    {
         RecordBatch::try_from_iter([(
             "record_batch_item",
             arrow_serialize_to_mutable_array::<Element, Element, Collection>(self)?.finish(),

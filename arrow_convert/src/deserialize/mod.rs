@@ -387,11 +387,12 @@ impl_arrow_array!(TimestampNanosecondArray);
 /// Top-level API to deserialize from Arrow
 pub trait TryIntoCollection<Collection, Element>
 where
-    Element: ArrowField,
     Collection: FromIterator<Element>,
 {
     /// Convert from a `arrow::Array` to any collection that implements the `FromIterator` trait
-    fn try_into_collection(self) -> arrow::error::Result<Collection>;
+    fn try_into_collection(self) -> arrow::error::Result<Collection>
+    where
+        Element: ArrowDeserialize + ArrowField<Type = Element> + 'static;
 
     /// Same as `try_into_collection` except can coerce the conversion to a specific Arrow type. This is
     /// useful when the same rust type maps to one or more Arrow types for example `LargeString`.
@@ -451,12 +452,15 @@ where
 
 impl<Collection, Element, ArrowArray> TryIntoCollection<Collection, Element> for ArrowArray
 where
-    Element: ArrowDeserialize + ArrowField<Type = Element> + 'static,
-    <Element as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
+    Element: 'static,
     ArrowArray: std::borrow::Borrow<dyn Array>,
     Collection: FromIterator<Element>,
 {
-    fn try_into_collection(self) -> arrow::error::Result<Collection> {
+    fn try_into_collection(self) -> arrow::error::Result<Collection>
+    where
+        Element: ArrowDeserialize + ArrowField<Type = Element> + 'static,
+        <Element as ArrowDeserialize>::ArrayType: ArrowArrayIterable,
+    {
         Ok(arrow_array_deserialize_iterator::<Element>(self.borrow())?.collect())
     }
 
