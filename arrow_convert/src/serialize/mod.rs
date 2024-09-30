@@ -1,6 +1,6 @@
 //! Implementation and traits for serializing to Arrow.
 
-use arrow::datatypes::{ArrowNativeType, Field};
+use arrow::datatypes::ArrowNativeType;
 use arrow::{array::*, datatypes};
 // use arrow::datatypes::ArrowNativeType;
 use arrow::buffer::{Buffer, ScalarBuffer};
@@ -305,11 +305,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(Field::new(
-            "item",
-            <T as ArrowField>::data_type(),
-            <T as ArrowField>::is_nullable(),
-        ));
+        let field = Arc::new(<T as ArrowField>::field("item"));
         ListBuilder::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
@@ -337,11 +333,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(Field::new(
-            "item",
-            <T as ArrowField>::data_type(),
-            <T as ArrowField>::is_nullable(),
-        ));
+        let field = Arc::new(<T as ArrowField>::field("item"));
         ListBuilder::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 
@@ -367,11 +359,7 @@ where
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
-        let field = Arc::new(Field::new(
-            "item",
-            <T as ArrowField>::data_type(),
-            <T as ArrowField>::is_nullable(),
-        ));
+        let field = Arc::new(<T as ArrowField>::field("item"));
         Self::ArrayBuilderType::new(<T as ArrowSerialize>::new_array()).with_field(field)
     }
 

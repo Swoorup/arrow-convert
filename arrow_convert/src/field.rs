@@ -122,8 +122,8 @@ impl<const PRECISION: u8, const SCALE: i8> ArrowField for I128<PRECISION, SCALE>
     type Type = i128;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Decimal128(PRECISION, SCALE)
+    fn data_type() -> DataType {
+        DataType::Decimal128(PRECISION, SCALE)
     }
 }
 
@@ -131,8 +131,8 @@ impl<'a> ArrowField for &'a str {
     type Type = &'a str;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Utf8
+    fn data_type() -> DataType {
+        DataType::Utf8
     }
 }
 
@@ -140,8 +140,8 @@ impl ArrowField for String {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Utf8
+    fn data_type() -> DataType {
+        DataType::Utf8
     }
 }
 
@@ -152,8 +152,8 @@ impl ArrowField for LargeString {
     type Type = String;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::LargeUtf8
+    fn data_type() -> DataType {
+        DataType::LargeUtf8
     }
 }
 
@@ -161,8 +161,8 @@ impl ArrowField for bool {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Boolean
+    fn data_type() -> DataType {
+        DataType::Boolean
     }
 }
 
@@ -170,8 +170,8 @@ impl ArrowField for NaiveDateTime {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Timestamp(arrow::datatypes::TimeUnit::Nanosecond, None)
+    fn data_type() -> DataType {
+        DataType::Timestamp(arrow::datatypes::TimeUnit::Nanosecond, None)
     }
 }
 
@@ -179,8 +179,8 @@ impl ArrowField for NaiveDate {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Date32
+    fn data_type() -> DataType {
+        DataType::Date32
     }
 }
 
@@ -189,16 +189,16 @@ impl ArrowField for Buffer {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Binary
+    fn data_type() -> DataType {
+        DataType::Binary
     }
 }
 impl ArrowField for ScalarBuffer<u8> {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Binary
+    fn data_type() -> DataType {
+        DataType::Binary
     }
 }
 
@@ -206,8 +206,8 @@ impl ArrowField for Vec<u8> {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::Binary
+    fn data_type() -> DataType {
+        DataType::Binary
     }
 }
 
@@ -218,8 +218,8 @@ impl ArrowField for LargeBinary {
     type Type = Vec<u8>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::LargeBinary
+    fn data_type() -> DataType {
+        DataType::LargeBinary
     }
 }
 
@@ -230,8 +230,8 @@ impl<const SIZE: i32> ArrowField for FixedSizeBinary<SIZE> {
     type Type = Vec<u8>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::FixedSizeBinary(SIZE)
+    fn data_type() -> DataType {
+        DataType::FixedSizeBinary(SIZE)
     }
 }
 
@@ -239,8 +239,8 @@ impl<const SIZE: usize> ArrowField for [u8; SIZE] {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::FixedSizeBinary(SIZE as i32)
+    fn data_type() -> DataType {
+        DataType::FixedSizeBinary(SIZE as i32)
     }
 }
 
@@ -265,8 +265,8 @@ where
     type Type = Vec<<T as ArrowField>::Type>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::List(Arc::new(<T as ArrowField>::field("item")))
+    fn data_type() -> DataType {
+        DataType::List(Arc::new(<T as ArrowField>::field("item")))
     }
 }
 
@@ -282,8 +282,8 @@ where
     type Type = Vec<<T as ArrowField>::Type>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::LargeList(Arc::new(<T as ArrowField>::field("item")))
+    fn data_type() -> DataType {
+        DataType::LargeList(Arc::new(<T as ArrowField>::field("item")))
     }
 }
 

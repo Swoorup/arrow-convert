@@ -2,8 +2,6 @@
 mod iterable;
 pub use iterable::*;
 
-use std::sync::Arc;
-
 use arrow::{
     array::*,
     buffer::{Buffer, ScalarBuffer},
@@ -272,8 +270,8 @@ impl<const SIZE: usize> ArrowDeserialize for [u8; SIZE] {
     }
 }
 
-fn arrow_deserialize_vec_helper<T>(
-    v: Option<Arc<dyn Array>>,
+pub(crate) fn arrow_deserialize_vec_helper<T>(
+    v: Option<ArrayRef>,
 ) -> Option<<Vec<T> as ArrowField>::Type>
 where
     T: ArrowDeserialize + ArrowEnableVecForType + 'static,
@@ -319,7 +317,7 @@ where
 {
     type ArrayType = ListArray;
 
-    fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: Option<ArrayRef>) -> Option<<Self as ArrowField>::Type> {
         arrow_deserialize_vec_helper::<T>(v)
     }
 }
@@ -332,7 +330,7 @@ where
 {
     type ArrayType = LargeListArray;
 
-    fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: Option<ArrayRef>) -> Option<<Self as ArrowField>::Type> {
         arrow_deserialize_vec_helper::<T>(v)
     }
 }
@@ -345,7 +343,7 @@ where
 {
     type ArrayType = FixedSizeListArray;
 
-    fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: Option<ArrayRef>) -> Option<<Self as ArrowField>::Type> {
         arrow_deserialize_vec_helper::<T>(v)
     }
 }
@@ -357,7 +355,7 @@ where
 {
     type ArrayType = FixedSizeListArray;
 
-    fn arrow_deserialize(v: Option<Arc<dyn Array>>) -> Option<<Self as ArrowField>::Type> {
+    fn arrow_deserialize(v: Option<ArrayRef>) -> Option<<Self as ArrowField>::Type> {
         let result = arrow_deserialize_vec_helper::<T>(v)?;
         let length = result.len();
 
@@ -405,7 +403,7 @@ where
 
 /// Helper to return an iterator for elements from a [`arrow::array::Array`].
 fn arrow_array_deserialize_iterator_internal<Element, Field>(
-    b: &dyn arrow::array::Array,
+    b: &dyn Array,
 ) -> impl Iterator<Item = Element> + '_
 where
     Field: ArrowDeserialize + ArrowField<Type = Element> + 'static,
@@ -417,7 +415,7 @@ where
 
 /// Returns a typed iterator to a target type from an `arrow::Array`
 pub fn arrow_array_deserialize_iterator_as_type<Element, ArrowType>(
-    arr: &dyn arrow::array::Array,
+    arr: &dyn Array,
 ) -> arrow::error::Result<impl Iterator<Item = Element> + '_>
 where
     Element: 'static,
@@ -442,7 +440,7 @@ where
 
 /// Return an iterator that deserializes an [`Array`] to an element of type T
 pub fn arrow_array_deserialize_iterator<T>(
-    arr: &dyn arrow::array::Array,
+    arr: &dyn Array,
 ) -> arrow::error::Result<impl Iterator<Item = T> + '_>
 where
     T: ArrowDeserialize + ArrowField<Type = T> + 'static,
