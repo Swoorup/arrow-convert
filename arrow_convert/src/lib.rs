@@ -17,3 +17,5 @@ pub use arrow_convert_derive::{ArrowDeserialize, ArrowField, ArrowSerialize};
 #[cfg_attr(not(target_os = "windows"), doc = include_str!("../README.md"))]
 #[cfg(doctest)]
 struct ReadmeDoctests;
+
+mod features;

@@ -70,6 +70,14 @@ Default implementations of the above traits are provided for the following:
 - Large Arrow types [`LargeBinary`], [`LargeString`], [`LargeList`] are supported via the `type` attribute. Please see the [complex_example.rs](./arrow_convert/tests/complex_example.rs) for usage.
 - Fixed size types [`FixedSizeBinary`], [`FixedSizeList`] are supported via the `FixedSizeVec` type override.
     - Note: nesting of [`FixedSizeList`] is not supported.
+- `TinyAsciiStr` from the [tinystr](https://github.com/zbraniecki/tinystr) crate (with the `tinystr` feature enabled)
+- `Decimal` from the [rust_decimal](https://github.com/paupino/rust-decimal) crate (with the `rust_decimal` feature enabled)
+- `Glam` vector and matrix types (with the `glam` feature enabled):
+    - `Vec2`, `Vec3`, `Vec4`
+    - `DVec2`, `DVec3`, `DVec4`
+    - `BVec2`, `BVec3`, `BVec4`
+    - `Mat2`, `Mat3`, `Mat4`
+    - `DMat2`, `DMat3`, `DMat4`
 
 ### Enums
 

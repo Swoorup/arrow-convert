@@ -8,6 +8,14 @@ keywords.workspace = true
 repository.workspace = true
 description = "Convert between nested rust types and Arrow with arrow"
 
+[features]
+default = ["derive"]
+
+derive = ["arrow_convert_derive"]
+tinystr = ["dep:tinystr"]
+rust_decimal = ["dep:rust_decimal"]
+glam = ["dep:glam"]
+
 [dependencies]
 arrow = { workspace = true }
 arrow_convert_derive = { workspace = true, optional = true }
@@ -15,15 +23,19 @@ half = { workspace = true }
 chrono = { workspace = true, features = ["std"] }
 err-derive = { workspace = true }
 
+# optional deps
+tinystr = { workspace = true, optional = true }
+rust_decimal = { workspace = true, optional = true }
+glam = { workspace = true, optional = true }
+
 [dev-dependencies]
 arrow_convert_derive = { workspace = true }
+glam = { workspace = true }
+tinystr = { workspace = true }
+rust_decimal = { workspace = true }
 criterion = { workspace = true }
 trybuild = { workspace = true }
 pretty_assertions = { workspace = true }
-
-[features]
-default = ["derive"]
-derive = ["arrow_convert_derive"]
 
 [lib]
 bench = false
