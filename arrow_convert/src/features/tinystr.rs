@@ -32,6 +32,6 @@ impl<const N: usize> ArrowDeserialize for TinyAsciiStr<N> {
     type ArrayType = FixedSizeBinaryArray;
 
     fn arrow_deserialize(v: Option<&[u8]>) -> Option<Self> {
-        v.and_then(|bytes| TinyAsciiStr::from_bytes(bytes).ok())
+        v.and_then(|bytes| TinyAsciiStr::try_from_utf8(bytes).ok())
     }
 }
