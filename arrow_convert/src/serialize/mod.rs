@@ -186,7 +186,7 @@ impl ArrowSerialize for NaiveDate {
     #[inline]
     fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
         array.append_option(Some(
-            chrono::Datelike::num_days_from_ce(v) - arrow::temporal_conversions::EPOCH_DAYS_FROM_CE,
+            chrono::Datelike::num_days_from_ce(v) - arrow::temporal_conversions::UNIX_EPOCH_DAY as i32,
         ));
         Ok(())
     }

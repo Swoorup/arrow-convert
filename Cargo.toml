@@ -8,27 +8,27 @@ authors = [
   "Jorge Leitao <jorgecarleitao@gmail.com>",
   "Chandra Penke <chandrapenke@gmail.com>",
 ]
-version = "0.7.3"
+version = "0.8.0"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 keywords = ["Arrow", "arrow"]
 repository = "https://github.com/Swoorup/arrow-convert"
 
 [workspace.dependencies]
-arrow_convert = { path = "arrow_convert", version = "0.7.3" }
-arrow_convert_derive = { path = "arrow_convert_derive", version = "0.7.3" }
+arrow_convert = { path = "arrow_convert", version = "0.8.0" }
+arrow_convert_derive = { path = "arrow_convert_derive", version = "0.8.0" }
 
-arrow = "53.3"
+arrow = "54"
 chrono = { version = "0.4", default-features = false }
 criterion = "0.5"
 err-derive = "0.3"
-half = { version = "2.4", default-features = false }
+half = { version = "2", default-features = false }
 proc-macro-error2 = "2"
 proc-macro2 = "1"
 quote = "1"
 syn = "2"
-trybuild = "1.0"
-pretty_assertions = "1.4"
+trybuild = "1"
+pretty_assertions = "1"
 tinystr = "0.8"
-rust_decimal = "1.36"
+rust_decimal = "1"
 glam = "0.29"
