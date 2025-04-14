@@ -11,8 +11,6 @@ The example below performs a round trip conversion of a struct with a single fie
 Please see the [complex_example.rs](https://github.com/Swoorup/arrow-convert/blob/main/arrow_convert/tests/complex_example.rs) for usage of the full functionality.
 
 ```rust
-/// Simple example
-
 use arrow::array::{Array, ArrayRef};
 use arrow_convert::{deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowField, ArrowSerialize, ArrowDeserialize};
 
@@ -21,26 +19,24 @@ pub struct Foo {
     name: String,
 }
 
-fn main() {
-    // an item
-    let original_array = [
-        Foo { name: "hello".to_string() },
-        Foo { name: "one more".to_string() },
-        Foo { name: "good bye".to_string() },
-    ];
+// an item
+let original_array = [
+    Foo { name: "hello".to_string() },
+    Foo { name: "one more".to_string() },
+    Foo { name: "good bye".to_string() },
+];
 
-    // serialize to an arrow array. try_into_arrow() is enabled by the TryIntoArrow trait
-    let arrow_array: ArrayRef = original_array.try_into_arrow().unwrap();
+// serialize to an arrow array. try_into_arrow() is enabled by the TryIntoArrow trait
+let arrow_array: ArrayRef = original_array.try_into_arrow().unwrap();
 
-    // which can be cast to an Arrow StructArray and be used for all kinds of IPC, FFI, etc.
-    // supported by `arrow`
-    let struct_array= arrow_array.as_any().downcast_ref::<arrow::array::StructArray>().unwrap();
-    assert_eq!(struct_array.len(), 3);
+// which can be cast to an Arrow StructArray and be used for all kinds of IPC, FFI, etc.
+// supported by `arrow`
+let struct_array= arrow_array.as_any().downcast_ref::<arrow::array::StructArray>().unwrap();
+assert_eq!(struct_array.len(), 3);
 
-    // deserialize back to our original vector via TryIntoCollection trait.
-    let round_trip_array: Vec<Foo> = arrow_array.try_into_collection().unwrap();
-    assert_eq!(round_trip_array, original_array);
-}
+// deserialize back to our original vector via TryIntoCollection trait.
+let round_trip_array: Vec<Foo> = arrow_array.try_into_collection().unwrap();
+assert_eq!(round_trip_array, original_array);
 ```
 
 ## API
