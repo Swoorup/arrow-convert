@@ -11,8 +11,6 @@ The example below performs a round trip conversion of a struct with a single fie
 Please see the [complex_example.rs](https://github.com/Swoorup/arrow-convert/blob/main/arrow_convert/tests/complex_example.rs) for usage of the full functionality.
 
 ```rust
-/// Simple example
-
 use arrow::array::{Array, ArrayRef};
 use arrow_convert::{deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowField, ArrowSerialize, ArrowDeserialize};
 
