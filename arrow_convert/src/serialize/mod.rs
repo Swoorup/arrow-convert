@@ -100,7 +100,7 @@ impl<const PRECISION: u8, const SCALE: i8> ArrowSerialize for I128<PRECISION, SC
     }
 }
 
-impl<'a> ArrowSerialize for &'a str {
+impl ArrowSerialize for &str {
     type ArrayBuilderType = StringBuilder;
 
     #[inline]

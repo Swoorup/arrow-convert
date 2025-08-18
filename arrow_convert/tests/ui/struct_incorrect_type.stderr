@@ -4,7 +4,8 @@ error[E0277]: the trait bound `String: Borrow<Vec<u8>>` is not satisfied
 4 | #[derive(Debug, ArrowField, ArrowSerialize, ArrowDeserialize)]
   |                             ^^^^^^^^^^^^^^ the trait `Borrow<Vec<u8>>` is not implemented for `String`
   |
-  = help: the trait `Borrow<str>` is implemented for `String`
+  = help: the trait `Borrow<Vec<u8>>` is not implemented for `String`
+          but trait `Borrow<str>` is implemented for it
   = help: for that trait implementation, expected `str`, found `Vec<u8>`
   = note: this error originates in the derive macro `ArrowSerialize` (in Nightly builds, run with -Z macro-backtrace for more info)
 
