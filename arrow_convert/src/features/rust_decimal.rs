@@ -45,11 +45,9 @@ fn decimal_to_scaled_i128(decimal: Decimal) -> i128 {
     let m = decimal.mantissa();
     let scale_diff = DECIMAL_DEFAULT_SCALE as i32 - decimal.scale() as i32;
 
-    if scale_diff == 0 {
-        m
-    } else if scale_diff < 0 {
-        m / 10_i128.pow(scale_diff.unsigned_abs())
-    } else {
-        m * 10_i128.pow(scale_diff as u32)
+    match scale_diff.cmp(&0) {
+        std::cmp::Ordering::Equal => m,
+        std::cmp::Ordering::Less => m / 10_i128.pow(scale_diff.unsigned_abs()),
+        std::cmp::Ordering::Greater => m * 10_i128.pow(scale_diff as u32),
     }
 }
