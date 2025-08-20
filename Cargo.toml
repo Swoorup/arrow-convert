@@ -8,7 +8,7 @@ authors = [
   "Jorge Leitao <jorgecarleitao@gmail.com>",
   "Chandra Penke <chandrapenke@gmail.com>",
 ]
-version = "0.9.1"
+version = "0.10.0"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 keywords = ["Arrow", "arrow"]
