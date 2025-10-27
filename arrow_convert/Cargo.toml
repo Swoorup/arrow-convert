@@ -12,34 +12,38 @@ description = "Convert between nested rust types and Arrow with arrow"
 default = ["derive"]
 
 derive = ["arrow_convert_derive"]
-tinystr = ["dep:tinystr"]
-rust_decimal = ["dep:rust_decimal"]
 glam = ["dep:glam"]
+rust_decimal = ["dep:rust_decimal"]
+tinystr = ["dep:tinystr"]
 
 [dependencies]
-arrow = { workspace = true }
+arrow-array = { workspace = true }
+arrow-buffer = { workspace = true }
+arrow-data = { workspace = true }
+arrow-schema = { workspace = true }
 arrow_convert_derive = { workspace = true, optional = true }
-half = { workspace = true }
 chrono = { workspace = true, features = ["std"] }
 err-derive = { workspace = true }
+half = { workspace = true }
 
 # optional deps
-tinystr = { workspace = true, optional = true }
-rust_decimal = { workspace = true, optional = true }
 glam = { workspace = true, optional = true }
+rust_decimal = { workspace = true, optional = true }
+tinystr = { workspace = true, optional = true }
 
 [dev-dependencies]
+arrow = { workspace = true }
 arrow_convert_derive = { workspace = true }
-glam = { workspace = true }
-tinystr = { workspace = true }
-rust_decimal = { workspace = true }
 criterion = { workspace = true }
-trybuild = { workspace = true }
+glam = { workspace = true }
 pretty_assertions = { workspace = true }
+rust_decimal = { workspace = true }
+tinystr = { workspace = true }
+trybuild = { workspace = true }
 
 [lib]
 bench = false
 
 [[bench]]
-name = "bench"
 harness = false
+name = "bench"

@@ -1,15 +1,15 @@
-use arrow::datatypes::DataType;
+use arrow_schema::DataType;
 
 use crate::arrow_enable_vec_for_type;
 use crate::deserialize::ArrowDeserialize;
 use crate::field::ArrowField;
 use crate::serialize::ArrowSerialize;
-use arrow::datatypes::Field;
+use arrow_schema::Field;
 
 use crate::deserialize::arrow_deserialize_vec_helper;
-use arrow::array::ArrayRef;
-use arrow::array::{BooleanBuilder, Float32Builder, Float64Builder};
-use arrow::array::{FixedSizeListArray, FixedSizeListBuilder};
+use arrow_array::builder::{BooleanBuilder, Float32Builder, Float64Builder};
+use arrow_array::ArrayRef;
+use arrow_array::{builder::FixedSizeListBuilder, FixedSizeListArray};
 use std::sync::Arc;
 
 /// This macro implements the `ArrowSerialize` and `ArrowDeserialize` traits for a given `glam` vector or matrix type.
@@ -43,7 +43,10 @@ macro_rules! impl_glam_ty {
                 Self::ArrayBuilderType::new(<$dt as ArrowSerialize>::new_array(), $size).with_field(field)
             }
 
-            fn arrow_serialize(v: &Self::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+            fn arrow_serialize(
+                v: &Self::Type,
+                array: &mut Self::ArrayBuilderType,
+            ) -> Result<(), arrow_schema::ArrowError> {
                 let v = $se(v);
 
                 array.values().append_slice(v.as_ref());

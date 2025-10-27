@@ -3,10 +3,10 @@ use crate::deserialize::ArrowDeserialize;
 use crate::field::ArrowField;
 use crate::serialize::ArrowSerialize;
 
-use arrow::datatypes::{DataType, DECIMAL128_MAX_PRECISION, DECIMAL_DEFAULT_SCALE};
+use arrow_schema::{DataType, DECIMAL128_MAX_PRECISION, DECIMAL_DEFAULT_SCALE};
 use rust_decimal::Decimal;
 
-use arrow::array::{Decimal128Array, Decimal128Builder};
+use arrow_array::{builder::Decimal128Builder, Decimal128Array};
 
 impl ArrowField for Decimal {
     type Type = Decimal;
@@ -26,7 +26,7 @@ impl ArrowSerialize for Decimal {
         Decimal128Builder::new().with_data_type(Self::data_type())
     }
 
-    fn arrow_serialize(v: &Self::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &Self::Type, array: &mut Self::ArrayBuilderType) -> Result<(), arrow_schema::ArrowError> {
         array.append_value(decimal_to_scaled_i128(*v));
         Ok(())
     }

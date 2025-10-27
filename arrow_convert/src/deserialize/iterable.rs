@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{BufferBinaryArray, BufferBinaryArrayIter};
-use arrow::{array::*, datatypes::ArrowPrimitiveType};
+use arrow_array::{iterator::*, ArrowPrimitiveType, *};
 
 /// A trait for Arrow arrays that can be transformed into an iterator.
 pub trait ArrowArrayIterable {
