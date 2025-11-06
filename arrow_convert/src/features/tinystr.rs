@@ -1,11 +1,11 @@
-use arrow::datatypes::DataType;
+use arrow_schema::DataType;
 use tinystr::TinyAsciiStr;
 
 use crate::deserialize::ArrowDeserialize;
 use crate::field::ArrowField;
 use crate::serialize::ArrowSerialize;
 
-use arrow::array::{FixedSizeBinaryArray, FixedSizeBinaryBuilder};
+use arrow_array::{builder::FixedSizeBinaryBuilder, FixedSizeBinaryArray};
 
 impl<const N: usize> ArrowField for TinyAsciiStr<N> {
     type Type = Self;
@@ -22,7 +22,7 @@ impl<const N: usize> ArrowSerialize for TinyAsciiStr<N> {
         FixedSizeBinaryBuilder::new(N as i32)
     }
 
-    fn arrow_serialize(v: &Self::Type, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &Self::Type, array: &mut Self::ArrayBuilderType) -> Result<(), arrow_schema::ArrowError> {
         array.append_value(v.as_bytes())?;
         Ok(())
     }

@@ -1,10 +1,10 @@
-use arrow::{
-    array::{
+use arrow_array::{
+    builder::{
         ArrayBuilder, BinaryBuilder, BooleanBufferBuilder, BooleanBuilder, FixedSizeBinaryBuilder,
         FixedSizeListBuilder, LargeBinaryBuilder, LargeListBuilder, LargeStringBuilder, ListBuilder, PrimitiveBuilder,
         StringBuilder,
     },
-    datatypes::ArrowPrimitiveType,
+    types::ArrowPrimitiveType,
 };
 
 /// Trait for appending null values to an array builder.

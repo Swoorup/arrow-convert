@@ -2,10 +2,8 @@
 
 use std::sync::Arc;
 
-use arrow::{
-    buffer::{Buffer, ScalarBuffer},
-    datatypes::{ArrowNativeType, DataType, Field},
-};
+use arrow_buffer::{ArrowNativeType, Buffer, ScalarBuffer};
+use arrow_schema::{DataType, Field};
 use chrono::{NaiveDate, NaiveDateTime};
 
 /// The default field name used when a specific name is not provided.
@@ -73,8 +71,8 @@ macro_rules! impl_numeric_type {
             type Type = $physical_type;
 
             #[inline]
-            fn data_type() -> arrow::datatypes::DataType {
-                arrow::datatypes::DataType::$logical_type
+            fn data_type() -> arrow_schema::DataType {
+                arrow_schema::DataType::$logical_type
             }
         }
     };
@@ -95,7 +93,7 @@ where
     type Type = Option<<T as ArrowField>::Type>;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
+    fn data_type() -> arrow_schema::DataType {
         <T as ArrowField>::data_type()
     }
 
@@ -174,7 +172,7 @@ impl ArrowField for NaiveDateTime {
 
     #[inline]
     fn data_type() -> DataType {
-        DataType::Timestamp(arrow::datatypes::TimeUnit::Nanosecond, None)
+        DataType::Timestamp(arrow_schema::TimeUnit::Nanosecond, None)
     }
 }
 
