@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.10.0...arrow_convert-v0.10.1) - 2025-11-06
+
+### Other
+
+- Use arrow subcrates to speed up compilation
+
 ## [0.9.1](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.9.0...arrow_convert-v0.9.1) - 2025-08-19
 
 ### Other
