@@ -30,6 +30,7 @@ half = { workspace = true }
 glam = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
 tinystr = { workspace = true, optional = true }
+uuid = { workspace = true }
 
 [dev-dependencies]
 arrow = { workspace = true }
