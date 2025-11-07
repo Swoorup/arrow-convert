@@ -318,7 +318,7 @@ impl ArrowDeserialize for uuid::Uuid {
 
     #[inline]
     fn arrow_deserialize(v: Option<&[u8]>) -> Option<Self> {
-        v.map(|t| uuid::Uuid::from_slice(t).unwrap())
+        v.and_then(|t| uuid::Uuid::from_slice(t).ok())
     }
 }
 

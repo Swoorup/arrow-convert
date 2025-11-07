@@ -19,3 +19,5 @@ pub use arrow_convert_derive::{ArrowDeserialize, ArrowField, ArrowSerialize};
 struct ReadmeDoctests;
 
 mod features;
+
+use uuid as uuid_crate;

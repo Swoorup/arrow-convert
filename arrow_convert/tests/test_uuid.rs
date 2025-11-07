@@ -3,7 +3,7 @@ use arrow::record_batch::RecordBatch;
 use arrow_convert::deserialize::*;
 use arrow_convert::field::ArrowField;
 use arrow_convert::serialize::*;
-use uuid::Uuid;
+use crate::uuid_crate::Uuid;
 
 #[test]
 fn test_uuid_serialize() {

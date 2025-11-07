@@ -11,7 +11,7 @@ pub use push_null::*;
 
 use crate::field::*;
 
-use uuid;
+use crate::uuid_crate::Uuid;
 
 /// Trait that is implemented by all types that are serializable to Arrow.
 ///
