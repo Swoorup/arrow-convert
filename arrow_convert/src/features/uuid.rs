@@ -34,6 +34,7 @@ impl ArrowDeserialize for Uuid {
 
 /// A builder for Uuid arrays wrapping a FixedSizeBinaryBuilder and providing Default for it.
 /// It is required so that we can enable the Vec<Uuid> implementation.
+#[derive(Debug)]
 pub struct UuidBuilder(FixedSizeBinaryBuilder);
 impl Default for UuidBuilder {
     fn default() -> Self {
