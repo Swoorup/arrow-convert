@@ -15,7 +15,7 @@ derive = ["arrow_convert_derive"]
 glam = ["dep:glam"]
 rust_decimal = ["dep:rust_decimal"]
 tinystr = ["dep:tinystr"]
-uuid = ["dep:uuid"]
+uuid = ["dep:uuid", "arrow-schema/canonical_extension_types"]
 
 [dependencies]
 arrow-array = { workspace = true }

@@ -124,4 +124,13 @@ mod uuid {
 
         assert_eq!(deserialized, original);
     }
+
+    #[test]
+    fn test_uuid_field() {
+        let field = Uuid::field("uuid");
+        assert_eq!(field.name(), "uuid");
+        assert_eq!(field.data_type(), &Uuid::data_type());
+        assert!(!field.is_nullable());
+        assert_eq!(field.extension_type_name(), Some("arrow.uuid"));
+    }
 }
