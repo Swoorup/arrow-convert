@@ -18,4 +18,4 @@ pub use arrow_convert_derive::{ArrowDeserialize, ArrowField, ArrowSerialize};
 #[cfg(doctest)]
 struct ReadmeDoctests;
 
-mod features;
+pub mod features;

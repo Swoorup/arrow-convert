@@ -7,7 +7,6 @@ mod uuid {
     use arrow_convert::serialize::*;
     use uuid::Uuid;
 
-    #[cfg(feature = "uuid")]
     #[test]
     fn test_uuid_serialize() {
         // Test with a known UUID
@@ -30,7 +29,6 @@ mod uuid {
         assert_eq!(rb.columns()[0].data_type(), &<Uuid as ArrowField>::data_type());
     }
 
-    #[cfg(feature = "uuid")]
     #[test]
     fn test_uuid_serialize_with_nulls() {
         // Test with optional UUIDs
@@ -43,7 +41,6 @@ mod uuid {
         assert_eq!(array.null_count(), 1);
     }
 
-    #[cfg(feature = "uuid")]
     #[test]
     fn test_uuid_deserialize() {
         // Test round-trip: serialize then deserialize
@@ -62,7 +59,6 @@ mod uuid {
         assert_eq!(deserialized[1], uuid2);
     }
 
-    #[cfg(feature = "uuid")]
     #[test]
     fn test_uuid_deserialize_with_nulls() {
         // Test optional UUIDs with nulls
@@ -82,7 +78,6 @@ mod uuid {
         assert_eq!(deserialized[2], Some(uuid_nil));
     }
 
-    #[cfg(feature = "uuid")]
     #[test]
     fn test_uuid_deserialize_iterator() {
         // Test iterator-based deserialization
@@ -100,5 +95,33 @@ mod uuid {
         for (deserialized, original) in iter.zip(original_uuids.iter()) {
             assert_eq!(&deserialized, original);
         }
+    }
+
+    #[test]
+    fn test_uuid_vec_round_trip() {
+        // Test Vec<Uuid> round-trip
+        let uuid1 = Uuid::parse_str("550e8400-e29b-41d4-a716-446655440000").unwrap();
+        let uuid2 = Uuid::parse_str("6ba7b810-9dad-11d1-80b4-00c04fd430c8").unwrap();
+        let uuid3 = Uuid::nil();
+        let original = vec![vec![uuid1, uuid2, uuid3]];
+
+        let array: ArrayRef = original.try_into_arrow().unwrap();
+        let deserialized: Vec<Vec<Uuid>> = array.try_into_collection().unwrap();
+
+        assert_eq!(deserialized, original);
+    }
+
+    #[test]
+    fn test_uuid_vec_deep_nested_round_trip() {
+        // Test Vec<Option<Uuid>> round-trip
+        let uuid1 = Uuid::parse_str("550e8400-e29b-41d4-a716-446655440000").unwrap();
+        let uuid2 = Uuid::parse_str("6ba7b810-9dad-11d1-80b4-00c04fd430c8").unwrap();
+        let uuid3 = Uuid::nil();
+        let original: Vec<Option<Vec<Option<Uuid>>>> = vec![Some(vec![Some(uuid1), None, Some(uuid2), Some(uuid3)])];
+
+        let array: ArrayRef = original.try_into_arrow().unwrap();
+        let deserialized: Vec<Option<Vec<Option<Uuid>>>> = array.try_into_collection().unwrap();
+
+        assert_eq!(deserialized, original);
     }
 }
