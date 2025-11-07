@@ -1,5 +1,3 @@
-//! Features modules
-
 #[cfg(feature = "tinystr")]
 mod tinystr;
 
@@ -10,4 +8,4 @@ mod rust_decimal;
 mod glam;
 
 #[cfg(feature = "uuid")]
-pub mod uuid;
+mod uuid;
