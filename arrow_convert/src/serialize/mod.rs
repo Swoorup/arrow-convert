@@ -11,8 +11,6 @@ pub use push_null::*;
 
 use crate::field::*;
 
-use crate::uuid_crate::Uuid;
-
 /// Trait that is implemented by all types that are serializable to Arrow.
 ///
 /// Implementations are provided for all built-in arrow types as well as Vec<T>, and Option<T>
@@ -391,20 +389,6 @@ where
         }
         array.append(true);
         Ok(())
-    }
-}
-
-impl ArrowSerialize for uuid::Uuid {
-    type ArrayBuilderType = FixedSizeBinaryBuilder;
-
-    #[inline]
-    fn new_array() -> Self::ArrayBuilderType {
-        Self::ArrayBuilderType::new(16)
-    }
-
-    #[inline]
-    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
-        array.append_value(v.as_bytes())
     }
 }
 

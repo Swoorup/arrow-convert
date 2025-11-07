@@ -313,15 +313,6 @@ where
     }
 }
 
-impl ArrowDeserialize for uuid::Uuid {
-    type ArrayType = FixedSizeBinaryArray;
-
-    #[inline]
-    fn arrow_deserialize(v: Option<&[u8]>) -> Option<Self> {
-        v.and_then(|t| uuid::Uuid::from_slice(t).ok())
-    }
-}
-
 impl<T, const SIZE: i32> ArrowDeserialize for FixedSizeVec<T, SIZE>
 where
     T: ArrowDeserialize + ArrowEnableVecForType + 'static,
