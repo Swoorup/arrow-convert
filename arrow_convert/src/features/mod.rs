@@ -6,3 +6,6 @@ mod rust_decimal;
 
 #[cfg(feature = "glam")]
 mod glam;
+
+#[cfg(feature = "uuid")]
+mod uuid;

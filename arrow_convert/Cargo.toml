@@ -15,6 +15,7 @@ derive = ["arrow_convert_derive"]
 glam = ["dep:glam"]
 rust_decimal = ["dep:rust_decimal"]
 tinystr = ["dep:tinystr"]
+uuid = ["dep:uuid", "arrow-schema/canonical_extension_types"]
 
 [dependencies]
 arrow-array = { workspace = true }
@@ -30,6 +31,7 @@ half = { workspace = true }
 glam = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
 tinystr = { workspace = true, optional = true }
+uuid = { workspace = true, optional = true }
 
 [dev-dependencies]
 arrow = { workspace = true }
