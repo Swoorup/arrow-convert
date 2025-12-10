@@ -4,7 +4,7 @@ pub use iterable::*;
 
 use arrow_array::{types, ArrowPrimitiveType, *};
 use arrow_buffer::{ArrowNativeType, Buffer, ScalarBuffer};
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc};
 
 use crate::field::*;
 
@@ -154,6 +154,15 @@ impl ArrowDeserialize for NaiveDateTime {
     #[inline]
     fn arrow_deserialize(v: Option<i64>) -> Option<Self> {
         v.and_then(arrow_array::temporal_conversions::timestamp_ns_to_datetime)
+    }
+}
+
+impl ArrowDeserialize for DateTime<Utc> {
+    type ArrayType = TimestampNanosecondArray;
+
+    #[inline]
+    fn arrow_deserialize(v: Option<i64>) -> Option<Self> {
+        v.map(|ns| Utc.timestamp_nanos(ns))
     }
 }
 

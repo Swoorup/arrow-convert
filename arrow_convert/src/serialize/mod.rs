@@ -3,7 +3,7 @@
 use arrow_array::{builder::*, types, *};
 use arrow_buffer::{ArrowNativeType, Buffer, ScalarBuffer};
 use arrow_schema::DataType;
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use std::sync::Arc;
 
 mod push_null;
@@ -177,6 +177,21 @@ impl ArrowSerialize for NaiveDateTime {
     #[inline]
     fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> Result<(), arrow_schema::ArrowError> {
         array.append_option(v.and_utc().timestamp_nanos_opt());
+        Ok(())
+    }
+}
+
+impl ArrowSerialize for DateTime<Utc> {
+    type ArrayBuilderType = TimestampNanosecondBuilder;
+
+    #[inline]
+    fn new_array() -> Self::ArrayBuilderType {
+        Self::ArrayBuilderType::default().with_data_type(<Self as ArrowField>::data_type())
+    }
+
+    #[inline]
+    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> Result<(), arrow_schema::ArrowError> {
+        array.append_option(v.timestamp_nanos_opt());
         Ok(())
     }
 }
