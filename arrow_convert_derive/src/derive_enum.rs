@@ -37,9 +37,12 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
             abort!(original_name.span(), "Expected enum to have at least one field");
         }
 
-        let variant_names_str = variant_names
+        let variant_names_str = variants
             .iter()
-            .map(|v| syn::LitStr::new(&format!("{v}"), proc_macro2::Span::call_site()))
+            .map(|v| {
+                let name = v.effective_name(input.rename_all);
+                syn::LitStr::new(&name, proc_macro2::Span::call_site())
+            })
             .collect::<Vec<_>>();
 
         let variant_indices = variant_names
