@@ -83,21 +83,20 @@ Enums are still an experimental feature and need to be integrated tested. Rust e
 
 ### Field Renaming
 
-Arrow field names can be customized using `#[arrow_field(name = "...")]` or by honoring serde's rename attributes:
+Arrow field names can be customized using `#[arrow_field(name = "...")]` at the field level or `#[arrow_field(rename_all = "...")]` at the container level:
 
 ```rust
 #[derive(ArrowField, ArrowSerialize, ArrowDeserialize)]
-#[arrow_field(rename_all = "camelCase")]  // or #[serde(rename_all = "camelCase")]
+#[arrow_field(rename_all = "camelCase")]
 struct MyStruct {
     user_name: String,           // -> "userName"
     #[arrow_field(name = "ID")]  // explicit override
     user_id: i64,                // -> "ID"
-    #[serde(rename = "count")]   // serde rename also works
-    item_count: i32,             // -> "count"
+    item_count: i32,             // -> "itemCount"
 }
 ```
 
-Precedence: `#[arrow_field(name)]` > `#[serde(rename)]` > `rename_all` > Rust field name.
+Precedence: `#[arrow_field(name)]` > `rename_all` > Rust field name.
 
 Supported `rename_all` values: `lowercase`, `UPPERCASE`, `camelCase`, `PascalCase`, `snake_case`, `SCREAMING_SNAKE_CASE`, `kebab-case`, `SCREAMING-KEBAB-CASE`.
 

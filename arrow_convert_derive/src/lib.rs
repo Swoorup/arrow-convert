@@ -9,7 +9,7 @@ use input::*;
 
 /// Derive macro for arrow fields
 #[proc_macro_error]
-#[proc_macro_derive(ArrowField, attributes(arrow_field, serde))]
+#[proc_macro_derive(ArrowField, attributes(arrow_field))]
 pub fn arrow_convert_derive_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
@@ -24,7 +24,7 @@ pub fn arrow_convert_derive_field(input: proc_macro::TokenStream) -> proc_macro:
 
 /// Derive macro for arrow serialize
 #[proc_macro_error]
-#[proc_macro_derive(ArrowSerialize, attributes(arrow_field, serde))]
+#[proc_macro_derive(ArrowSerialize, attributes(arrow_field))]
 pub fn arrow_convert_derive_serialize(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
@@ -39,7 +39,7 @@ pub fn arrow_convert_derive_serialize(input: proc_macro::TokenStream) -> proc_ma
 
 /// Derive macro for arrow deserialize
 #[proc_macro_error]
-#[proc_macro_derive(ArrowDeserialize, attributes(arrow_field, serde))]
+#[proc_macro_derive(ArrowDeserialize, attributes(arrow_field))]
 pub fn arrow_convert_derive_deserialize(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
