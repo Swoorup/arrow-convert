@@ -59,7 +59,7 @@ Default implementations of the above traits are provided for the following:
 - Other types: 
     - [`bool`], [`String`], [`Binary`]
 - Temporal types: 
-    - [`chrono::NaiveDate`], [`chrono::NaiveDateTime`]
+    - [`chrono::NaiveDate`], [`chrono::NaiveDateTime`], [`chrono::DateTime<Utc>`]
 - Option<T> if T implements `ArrowField`
 - Vec<T> if T implements `ArrowField`
 - `[T; SIZE]` if T implements `ArrowField`

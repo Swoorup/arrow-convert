@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use arrow_buffer::{ArrowNativeType, Buffer, ScalarBuffer};
 use arrow_schema::{DataType, Field};
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 
 /// The default field name used when a specific name is not provided.
 pub const DEFAULT_FIELD_NAME: &str = "_item";
@@ -176,6 +176,15 @@ impl ArrowField for NaiveDateTime {
     }
 }
 
+impl ArrowField for DateTime<Utc> {
+    type Type = Self;
+
+    #[inline]
+    fn data_type() -> DataType {
+        DataType::Timestamp(arrow_schema::TimeUnit::Nanosecond, Some("UTC".into()))
+    }
+}
+
 impl ArrowField for NaiveDate {
     type Type = Self;
 
@@ -323,6 +332,7 @@ arrow_enable_vec_for_type!(String);
 arrow_enable_vec_for_type!(LargeString);
 arrow_enable_vec_for_type!(bool);
 arrow_enable_vec_for_type!(NaiveDateTime);
+arrow_enable_vec_for_type!(DateTime<Utc>);
 arrow_enable_vec_for_type!(NaiveDate);
 arrow_enable_vec_for_type!(Vec<u8>);
 arrow_enable_vec_for_type!(Buffer);
