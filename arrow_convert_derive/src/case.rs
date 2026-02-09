@@ -1,28 +1,28 @@
 /// Case conversion rules matching serde's `rename_all` attribute.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RenameRule {
-    LowerCase,
-    UpperCase,
-    CamelCase,
-    PascalCase,
-    SnakeCase,
-    ScreamingSnakeCase,
-    KebabCase,
-    ScreamingKebabCase,
+    Lower,
+    Upper,
+    Camel,
+    Pascal,
+    Snake,
+    ScreamingSnake,
+    Kebab,
+    ScreamingKebab,
 }
 
 impl RenameRule {
     /// Parse a serde rename_all string into a RenameRule.
     pub fn from_str(s: &str) -> Option<RenameRule> {
         match s {
-            "lowercase" => Some(RenameRule::LowerCase),
-            "UPPERCASE" => Some(RenameRule::UpperCase),
-            "camelCase" => Some(RenameRule::CamelCase),
-            "PascalCase" => Some(RenameRule::PascalCase),
-            "snake_case" => Some(RenameRule::SnakeCase),
-            "SCREAMING_SNAKE_CASE" => Some(RenameRule::ScreamingSnakeCase),
-            "kebab-case" => Some(RenameRule::KebabCase),
-            "SCREAMING-KEBAB-CASE" => Some(RenameRule::ScreamingKebabCase),
+            "lowercase" => Some(RenameRule::Lower),
+            "UPPERCASE" => Some(RenameRule::Upper),
+            "camelCase" => Some(RenameRule::Camel),
+            "PascalCase" => Some(RenameRule::Pascal),
+            "snake_case" => Some(RenameRule::Snake),
+            "SCREAMING_SNAKE_CASE" => Some(RenameRule::ScreamingSnake),
+            "kebab-case" => Some(RenameRule::Kebab),
+            "SCREAMING-KEBAB-CASE" => Some(RenameRule::ScreamingKebab),
             _ => None,
         }
     }
@@ -31,9 +31,9 @@ impl RenameRule {
     pub fn apply(&self, name: &str) -> String {
         let words = split_into_words(name);
         match self {
-            RenameRule::LowerCase => words.concat().to_lowercase(),
-            RenameRule::UpperCase => words.concat().to_uppercase(),
-            RenameRule::CamelCase => {
+            RenameRule::Lower => words.concat().to_lowercase(),
+            RenameRule::Upper => words.concat().to_uppercase(),
+            RenameRule::Camel => {
                 let mut result = String::new();
                 for (i, word) in words.iter().enumerate() {
                     if i == 0 {
@@ -42,13 +42,14 @@ impl RenameRule {
                         result.push_str(&capitalize(word));
                     }
                 }
+
                 result
             }
-            RenameRule::PascalCase => words.iter().map(|w| capitalize(w)).collect(),
-            RenameRule::SnakeCase => words.iter().map(|w| w.to_lowercase()).collect::<Vec<_>>().join("_"),
-            RenameRule::ScreamingSnakeCase => words.iter().map(|w| w.to_uppercase()).collect::<Vec<_>>().join("_"),
-            RenameRule::KebabCase => words.iter().map(|w| w.to_lowercase()).collect::<Vec<_>>().join("-"),
-            RenameRule::ScreamingKebabCase => words.iter().map(|w| w.to_uppercase()).collect::<Vec<_>>().join("-"),
+            RenameRule::Pascal => words.iter().map(|w| capitalize(w)).collect(),
+            RenameRule::Snake => words.iter().map(|w| w.to_lowercase()).collect::<Vec<_>>().join("_"),
+            RenameRule::ScreamingSnake => words.iter().map(|w| w.to_uppercase()).collect::<Vec<_>>().join("_"),
+            RenameRule::Kebab => words.iter().map(|w| w.to_lowercase()).collect::<Vec<_>>().join("-"),
+            RenameRule::ScreamingKebab => words.iter().map(|w| w.to_uppercase()).collect::<Vec<_>>().join("-"),
         }
     }
 }
@@ -132,41 +133,38 @@ mod tests {
 
     #[test]
     fn test_apply_camel_case() {
-        assert_eq!(RenameRule::CamelCase.apply("my_field_name"), "myFieldName");
-        assert_eq!(RenameRule::CamelCase.apply("MyFieldName"), "myFieldName");
+        assert_eq!(RenameRule::Camel.apply("my_field_name"), "myFieldName");
+        assert_eq!(RenameRule::Camel.apply("MyFieldName"), "myFieldName");
     }
 
     #[test]
     fn test_apply_pascal_case() {
-        assert_eq!(RenameRule::PascalCase.apply("my_field_name"), "MyFieldName");
+        assert_eq!(RenameRule::Pascal.apply("my_field_name"), "MyFieldName");
     }
 
     #[test]
     fn test_apply_snake_case() {
-        assert_eq!(RenameRule::SnakeCase.apply("myFieldName"), "my_field_name");
-        assert_eq!(RenameRule::SnakeCase.apply("MyFieldName"), "my_field_name");
+        assert_eq!(RenameRule::Snake.apply("myFieldName"), "my_field_name");
+        assert_eq!(RenameRule::Snake.apply("MyFieldName"), "my_field_name");
     }
 
     #[test]
     fn test_apply_screaming_snake_case() {
-        assert_eq!(
-            RenameRule::ScreamingSnakeCase.apply("myFieldName"),
-            "MY_FIELD_NAME"
-        );
+        assert_eq!(RenameRule::ScreamingSnake.apply("myFieldName"), "MY_FIELD_NAME");
     }
 
     #[test]
     fn test_apply_kebab_case() {
-        assert_eq!(RenameRule::KebabCase.apply("my_field_name"), "my-field-name");
+        assert_eq!(RenameRule::Kebab.apply("my_field_name"), "my-field-name");
     }
 
     #[test]
     fn test_apply_lowercase() {
-        assert_eq!(RenameRule::LowerCase.apply("MyFieldName"), "myfieldname");
+        assert_eq!(RenameRule::Lower.apply("MyFieldName"), "myfieldname");
     }
 
     #[test]
     fn test_apply_uppercase() {
-        assert_eq!(RenameRule::UpperCase.apply("my_field_name"), "MYFIELDNAME");
+        assert_eq!(RenameRule::Upper.apply("my_field_name"), "MYFIELDNAME");
     }
 }

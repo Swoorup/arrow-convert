@@ -86,6 +86,7 @@ Enums are still an experimental feature and need to be integrated tested. Rust e
 Arrow field names can be customized using `#[arrow_field(name = "...")]` at the field level or `#[arrow_field(rename_all = "...")]` at the container level:
 
 ```rust
+# use arrow_convert::{ArrowField, ArrowSerialize, ArrowDeserialize};
 #[derive(ArrowField, ArrowSerialize, ArrowDeserialize)]
 #[arrow_field(rename_all = "camelCase")]
 struct MyStruct {
