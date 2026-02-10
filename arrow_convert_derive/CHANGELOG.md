@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.11.2](https://github.com/Swoorup/arrow-convert/compare/arrow_convert_derive-v0.11.1...arrow_convert_derive-v0.11.2) - 2026-02-10
+
+### Added
+
+- Support using serde rename_all and prescedence
+
+### Other
+
+- Fix clippy & tests
+- Remove serde rename_all
+- Add support for chrono::DateTime<Utc> fields and (de)serialization
 # Changelog
 
 All notable changes to this project will be documented in this file.

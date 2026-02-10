@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.2](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.11.1...arrow_convert-v0.11.2) - 2026-02-10
+
+### Added
+
+- Support using serde rename_all and prescedence
+
+### Other
+
+- Fix clippy & tests
+- Remove serde rename_all
+- Add support for chrono::DateTime<Utc> fields and (de)serialization
+
 ## [0.11.1](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.11.0...arrow_convert-v0.11.1) - 2025-11-09
 
 ### Other
