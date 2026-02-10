@@ -101,6 +101,39 @@ Precedence: `#[arrow_field(name)]` > `rename_all` > Rust field name.
 
 Supported `rename_all` values: `lowercase`, `UPPERCASE`, `camelCase`, `PascalCase`, `snake_case`, `SCREAMING_SNAKE_CASE`, `kebab-case`, `SCREAMING-KEBAB-CASE`.
 
+### Field Metadata and List Element Annotations
+
+Arrow field metadata can be attached via `metadata(...)` and list element metadata can be attached via `list_element_metadata(...)`.
+
+```rust
+# use arrow_convert::ArrowField;
+#[derive(ArrowField)]
+struct SchemaAnnotated {
+    #[arrow_field(metadata(role = "top", PARQUET::field_id = "7"))]
+    top_level: i64,
+    #[arrow_field(
+        list_element_name = "element",
+        list_element_metadata(PARQUET::field_id = "9", scope = "book")
+    )]
+    prices: Vec<i64>,
+}
+```
+
+List element naming can be set at the container level and overridden per field:
+
+```rust
+# use arrow_convert::ArrowField;
+#[derive(ArrowField)]
+#[arrow_field(list_element_name = "entry")]
+struct Lists {
+    bids: Vec<i64>, // list child field name -> "entry"
+    #[arrow_field(list_element_name = "level")]
+    asks: Vec<i64>, // list child field name -> "level"
+}
+```
+
+For list element metadata, precedence is field-level override over container-level defaults for matching keys.
+
 ### i128
 
 i128 represents a decimal number and requires the precision and scale to be specified to be used as an Arrow data type. The precision and scale can be specified by using a type override via the `I128` type. 

@@ -10,6 +10,9 @@ use crate::case::RenameRule;
 pub const ARROW_FIELD: &str = "arrow_field";
 pub const FIELD_TYPE: &str = "type";
 pub const FIELD_NAME: &str = "name";
+pub const FIELD_LIST_ELEMENT_NAME: &str = "list_element_name";
+pub const FIELD_METADATA: &str = "metadata";
+pub const FIELD_LIST_ELEMENT_METADATA: &str = "list_element_metadata";
 pub const FIELD_SKIP: &str = "skip";
 pub const FIELD_RENAME_ALL: &str = "rename_all";
 pub const UNION_TYPE: &str = "type";
@@ -31,6 +34,10 @@ pub struct DeriveStruct {
     pub is_transparent: bool,
     /// Container-level rename_all rule
     pub rename_all: Option<RenameRule>,
+    /// Container-level list element field name override.
+    pub list_element_name: Option<String>,
+    /// Container-level list element metadata default.
+    pub list_element_metadata: Vec<(String, String)>,
 }
 
 pub struct DeriveEnum {
@@ -48,12 +55,19 @@ pub struct ContainerAttrs {
     pub transparent: Option<Span>,
     /// Container-level rename_all rule
     pub rename_all: Option<RenameRule>,
+    /// Container-level list element field name override.
+    pub list_element_name: Option<String>,
+    /// Container-level list element metadata default.
+    pub list_element_metadata: Vec<(String, String)>,
 }
 
 /// All field attributes
 pub struct FieldAttrs {
     pub field_type: Option<syn::Type>,
     pub field_name: Option<String>,
+    pub list_element_name: Option<String>,
+    pub metadata: Vec<(String, String)>,
+    pub list_element_metadata: Vec<(String, String)>,
     pub skip: bool,
 }
 
@@ -61,6 +75,9 @@ pub struct DeriveField {
     pub syn: syn::Field,
     pub field_type: syn::Type,
     pub field_name: Option<String>,
+    pub list_element_name: Option<String>,
+    pub metadata: Vec<(String, String)>,
+    pub list_element_metadata: Vec<(String, String)>,
     pub skip: bool,
 }
 
@@ -96,6 +113,8 @@ impl ContainerAttrs {
         let mut is_dense: Option<bool> = None;
         let mut is_transparent: Option<Span> = None;
         let mut rename_all: Option<RenameRule> = None;
+        let mut list_element_name: Option<String> = None;
+        let mut list_element_metadata: Vec<(String, String)> = Vec::new();
 
         for attr in attrs {
             if attr.path().is_ident(ARROW_FIELD) {
@@ -131,6 +150,23 @@ impl ContainerAttrs {
                                     rename_all = Some(rule);
                                 }
                                 Ok(())
+                            } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
+                                let value = nested.value()?;
+                                let Lit::Str(string) = value.parse()? else {
+                                    return Err(nested.error("Unexpected value for list_element_name"));
+                                };
+                                list_element_name = Some(string.value());
+                                Ok(())
+                            } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
+                                nested.parse_nested_meta(|entry| {
+                                    let key = metadata_key(&entry.path)?;
+                                    let value = entry.value()?;
+                                    let Lit::Str(string) = value.parse()? else {
+                                        return Err(entry.error("Expected string value for metadata entry"));
+                                    };
+                                    list_element_metadata.push((key, string.value()));
+                                    Ok(())
+                                })
                             } else {
                                 Err(meta.error("Unexpected attribute"))
                             }
@@ -146,6 +182,8 @@ impl ContainerAttrs {
             is_dense,
             transparent: is_transparent,
             rename_all,
+            list_element_name,
+            list_element_metadata,
         }
     }
 }
@@ -154,6 +192,9 @@ impl FieldAttrs {
     pub fn from_ast(input: &[syn::Attribute]) -> FieldAttrs {
         let mut field_type: Option<syn::Type> = None;
         let mut field_name: Option<String> = None;
+        let mut list_element_name: Option<String> = None;
+        let mut metadata: Vec<(String, String)> = Vec::new();
+        let mut list_element_metadata: Vec<(String, String)> = Vec::new();
         let mut skip = false;
 
         for attr in input {
@@ -178,6 +219,32 @@ impl FieldAttrs {
                                 return Err(meta.error("Unexpected attribute"));
                             };
                             field_name = Some(string.value());
+                        } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
+                            let value = nested.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(meta.error("Unexpected attribute"));
+                            };
+                            list_element_name = Some(string.value());
+                        } else if nested.path.is_ident(FIELD_METADATA) {
+                            nested.parse_nested_meta(|entry| {
+                                let key = metadata_key(&entry.path)?;
+                                let value = entry.value()?;
+                                let Lit::Str(string) = value.parse()? else {
+                                    return Err(entry.error("Expected string value for metadata entry"));
+                                };
+                                metadata.push((key, string.value()));
+                                Ok(())
+                            })?;
+                        } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
+                            nested.parse_nested_meta(|entry| {
+                                let key = metadata_key(&entry.path)?;
+                                let value = entry.value()?;
+                                let Lit::Str(string) = value.parse()? else {
+                                    return Err(entry.error("Expected string value for metadata entry"));
+                                };
+                                list_element_metadata.push((key, string.value()));
+                                Ok(())
+                            })?;
                         } else {
                             return Err(meta.error("Unexpected attribute"));
                         }
@@ -191,6 +258,9 @@ impl FieldAttrs {
         FieldAttrs {
             field_type,
             field_name,
+            list_element_name,
+            metadata,
+            list_element_metadata,
             skip,
         }
     }
@@ -215,6 +285,8 @@ impl DeriveStruct {
             fields: ast.fields.iter().map(DeriveField::from_ast).collect::<Vec<_>>(),
             is_transparent,
             rename_all: container_attrs.rename_all,
+            list_element_name: container_attrs.list_element_name,
+            list_element_metadata: container_attrs.list_element_metadata,
         }
     }
 }
@@ -243,6 +315,9 @@ impl DeriveField {
             syn: input.clone(),
             field_type: attrs.field_type.unwrap_or_else(|| input.ty.clone()),
             field_name: attrs.field_name,
+            list_element_name: attrs.list_element_name,
+            metadata: attrs.metadata,
+            list_element_metadata: attrs.list_element_metadata,
             skip: attrs.skip,
         }
     }
@@ -268,6 +343,48 @@ impl DeriveField {
 
         rust_name
     }
+
+    /// Get the effective list element field name considering precedence:
+    /// arrow_field(list_element_name) > container list_element_name
+    pub fn effective_list_element_name(&self, container_list_element_name: Option<&str>) -> Option<String> {
+        self.list_element_name
+            .clone()
+            .or_else(|| container_list_element_name.map(str::to_string))
+    }
+
+    pub fn effective_list_element_metadata(
+        &self,
+        container_list_element_metadata: &[(String, String)],
+    ) -> Vec<(String, String)> {
+        merge_metadata_entries(container_list_element_metadata, &self.list_element_metadata)
+    }
+}
+
+fn merge_metadata_entries(base: &[(String, String)], overrides: &[(String, String)]) -> Vec<(String, String)> {
+    let mut merged = base.to_vec();
+    for (key, value) in overrides {
+        if let Some((_, existing_value)) = merged.iter_mut().find(|(k, _)| k == key) {
+            *existing_value = value.clone();
+        } else {
+            merged.push((key.clone(), value.clone()));
+        }
+    }
+    merged
+}
+
+fn metadata_key(path: &syn::Path) -> syn::Result<String> {
+    if path.segments.is_empty() || path.segments.iter().any(|s| !s.arguments.is_empty()) {
+        return Err(syn::Error::new(
+            path.span(),
+            "Expected metadata key identifier path",
+        ));
+    }
+    Ok(path
+        .segments
+        .iter()
+        .map(|segment| segment.ident.to_string())
+        .collect::<Vec<_>>()
+        .join(":"))
 }
 
 impl DeriveVariant {

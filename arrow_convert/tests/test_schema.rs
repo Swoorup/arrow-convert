@@ -253,3 +253,134 @@ fn test_large_string_schema() {
         )))
     );
 }
+
+#[test]
+fn test_field_name_override_with_rename_all() {
+    #[derive(Debug, ArrowField)]
+    #[allow(dead_code)]
+    #[arrow_field(rename_all = "camelCase")]
+    struct Root {
+        plain_field: i32,
+        #[arrow_field(name = "custom_name")]
+        renamed_field: i32,
+        r#type: i32,
+    }
+
+    let DataType::Struct(fields) = <Root as arrow_convert::field::ArrowField>::data_type() else {
+        panic!("expected struct datatype");
+    };
+
+    let names: Vec<_> = fields.iter().map(|field| field.name().to_string()).collect();
+    assert_eq!(names, vec!["plainField", "custom_name", "type"]);
+}
+
+#[test]
+fn test_rename_all_composes_with_type_name_and_skip() {
+    #[derive(Debug, ArrowField)]
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    #[arrow_field(rename_all = "snake_case")]
+    struct Root {
+        plainField: i32,
+        #[arrow_field(type = "arrow_convert::field::LargeString")]
+        optionalLabel: Option<String>,
+        #[arrow_field(type = "arrow_convert::field::LargeVec<i64>", name = "custom_list")]
+        ignoredNameByRenameAll: Vec<i64>,
+        #[arrow_field(skip)]
+        shouldSkip: i32,
+    }
+
+    let DataType::Struct(fields) = <Root as arrow_convert::field::ArrowField>::data_type() else {
+        panic!("expected struct datatype");
+    };
+
+    assert_eq!(fields.len(), 3);
+
+    assert_eq!(fields[0].name(), "plain_field");
+    assert_eq!(fields[0].data_type(), &DataType::Int32);
+    assert!(!fields[0].is_nullable());
+
+    assert_eq!(fields[1].name(), "optional_label");
+    assert_eq!(fields[1].data_type(), &DataType::LargeUtf8);
+    assert!(!fields[1].is_nullable());
+
+    assert_eq!(fields[2].name(), "custom_list");
+    assert_eq!(
+        fields[2].data_type(),
+        &DataType::LargeList(Arc::new(Field::new(DEFAULT_FIELD_NAME, DataType::Int64, false)))
+    );
+    assert!(!fields[2].is_nullable());
+}
+
+#[test]
+fn test_list_element_name_container_and_field_override() {
+    #[derive(Debug, ArrowField)]
+    #[allow(dead_code)]
+    #[arrow_field(list_element_name = "entry")]
+    struct Root {
+        numbers: Vec<i32>,
+        #[arrow_field(list_element_name = "node")]
+        labels: Vec<String>,
+        scalar: i64,
+    }
+
+    let DataType::Struct(fields) = <Root as arrow_convert::field::ArrowField>::data_type() else {
+        panic!("expected struct datatype");
+    };
+
+    assert_eq!(
+        fields[0].data_type(),
+        &DataType::List(Arc::new(Field::new("entry", DataType::Int32, false)))
+    );
+    assert_eq!(
+        fields[1].data_type(),
+        &DataType::List(Arc::new(Field::new("node", DataType::Utf8, false)))
+    );
+    assert_eq!(fields[2].data_type(), &DataType::Int64);
+}
+
+#[test]
+fn test_metadata_support_for_parquet_field_id_keys() {
+    #[derive(Debug, ArrowField)]
+    #[allow(dead_code)]
+    #[arrow_field(list_element_metadata(scope = "container", PARQUET::field_id = "101"))]
+    struct Root {
+        #[arrow_field(
+            metadata(role = "top", PARQUET::field_id = "7"),
+            list_element_metadata(scope = "field", level = "1", PARQUET::field_id = "9")
+        )]
+        bids: Vec<i64>,
+        asks: Vec<i64>,
+    }
+
+    let DataType::Struct(fields) = <Root as arrow_convert::field::ArrowField>::data_type() else {
+        panic!("expected struct datatype");
+    };
+
+    let bids = &fields[0];
+    assert_eq!(bids.metadata().get("role"), Some(&"top".to_string()));
+    assert_eq!(bids.metadata().get("PARQUET:field_id"), Some(&"7".to_string()));
+    let DataType::List(bids_element) = bids.data_type() else {
+        panic!("expected list datatype for bids");
+    };
+    assert_eq!(bids_element.metadata().get("scope"), Some(&"field".to_string()));
+    assert_eq!(bids_element.metadata().get("level"), Some(&"1".to_string()));
+    assert_eq!(
+        bids_element.metadata().get("PARQUET:field_id"),
+        Some(&"9".to_string())
+    );
+
+    let asks = &fields[1];
+    assert!(asks.metadata().get("role").is_none());
+    let DataType::List(asks_element) = asks.data_type() else {
+        panic!("expected list datatype for asks");
+    };
+    assert_eq!(
+        asks_element.metadata().get("scope"),
+        Some(&"container".to_string())
+    );
+    assert_eq!(
+        asks_element.metadata().get("PARQUET:field_id"),
+        Some(&"101".to_string())
+    );
+}
