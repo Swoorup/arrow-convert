@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use arrow::datatypes::*;
-use arrow_convert::{field::DEFAULT_FIELD_NAME, ArrowField};
+use arrow_convert::{
+    field::{with_list_element_metadata, with_list_element_name, DEFAULT_FIELD_NAME},
+    ArrowField,
+};
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -383,4 +386,64 @@ fn test_metadata_support_for_parquet_field_id_keys() {
         asks_element.metadata().get("PARQUET:field_id"),
         Some(&"101".to_string())
     );
+}
+
+#[test]
+fn test_list_element_metadata_field_override_wins_with_duplicate_container_keys() {
+    #[derive(Debug, ArrowField)]
+    #[allow(dead_code)]
+    #[arrow_field(
+        list_element_metadata(scope = "container_a"),
+        list_element_metadata(scope = "container_b", keep = "container")
+    )]
+    struct Root {
+        #[arrow_field(list_element_metadata(scope = "field"))]
+        levels: Vec<i64>,
+    }
+
+    let DataType::Struct(fields) = <Root as arrow_convert::field::ArrowField>::data_type() else {
+        panic!("expected struct datatype");
+    };
+    let DataType::List(levels_element) = fields[0].data_type() else {
+        panic!("expected list datatype");
+    };
+
+    assert_eq!(
+        levels_element.metadata().get("scope"),
+        Some(&"field".to_string())
+    );
+    assert_eq!(
+        levels_element.metadata().get("keep"),
+        Some(&"container".to_string())
+    );
+}
+
+#[test]
+fn test_with_list_element_helpers_for_large_and_fixed_size_lists() {
+    let large_field = Field::new(
+        "values",
+        DataType::LargeList(Arc::new(Field::new("_item", DataType::Int64, false))),
+        false,
+    );
+    let large_named = with_list_element_name(large_field, Some("element"));
+    let large_named = with_list_element_metadata(large_named, vec![("scope".to_string(), "book".to_string())]);
+    let DataType::LargeList(large_element) = large_named.data_type() else {
+        panic!("expected LargeList");
+    };
+    assert_eq!(large_element.name(), "element");
+    assert_eq!(large_element.metadata().get("scope"), Some(&"book".to_string()));
+
+    let fixed_field = Field::new(
+        "values",
+        DataType::FixedSizeList(Arc::new(Field::new("_item", DataType::Int64, false)), 3),
+        false,
+    );
+    let fixed_named = with_list_element_name(fixed_field, Some("level"));
+    let fixed_named = with_list_element_metadata(fixed_named, vec![("kind".to_string(), "depth".to_string())]);
+    let DataType::FixedSizeList(fixed_element, size) = fixed_named.data_type() else {
+        panic!("expected FixedSizeList");
+    };
+    assert_eq!(*size, 3);
+    assert_eq!(fixed_element.name(), "level");
+    assert_eq!(fixed_element.metadata().get("kind"), Some(&"depth".to_string()));
 }

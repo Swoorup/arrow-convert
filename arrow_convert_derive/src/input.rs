@@ -3,7 +3,7 @@ use proc_macro_error2::abort;
 use quote::format_ident;
 
 use syn::spanned::Spanned;
-use syn::{DeriveInput, Ident, Lit, Meta, Visibility};
+use syn::{DeriveInput, Ident, Lit, Visibility};
 
 use crate::case::RenameRule;
 
@@ -118,63 +118,59 @@ impl ContainerAttrs {
 
         for attr in attrs {
             if attr.path().is_ident(ARROW_FIELD) {
-                let _ = attr.parse_nested_meta(|meta| {
-                    if let Meta::List(list) = &attr.meta {
-                        list.parse_nested_meta(|nested| {
-                            if nested.path.is_ident(TRANSPARENT) {
-                                is_transparent = Some(nested.path.span());
-                                Ok(())
-                            } else if nested.path.is_ident(UNION_TYPE) {
-                                let value = nested.value()?;
-                                let Lit::Str(string) = value.parse()? else {
-                                    return Err(nested.error("Unexpected value for mode"));
-                                };
+                if let Err(err) = attr.parse_nested_meta(|nested| {
+                    if nested.path.is_ident(TRANSPARENT) {
+                        is_transparent = Some(nested.path.span());
+                        Ok(())
+                    } else if nested.path.is_ident(UNION_TYPE) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected value for mode"));
+                        };
 
-                                match string.value().as_ref() {
-                                    UNION_TYPE_DENSE => {
-                                        is_dense = Some(true);
-                                        Ok(())
-                                    }
-                                    UNION_TYPE_SPARSE => {
-                                        is_dense = Some(false);
-                                        Ok(())
-                                    }
-                                    _ => Err(nested.error("Unexpected value for mode")),
-                                }
-                            } else if nested.path.is_ident(FIELD_RENAME_ALL) {
-                                let value = nested.value()?;
-                                let Lit::Str(string) = value.parse()? else {
-                                    return Err(nested.error("Unexpected value for rename_all"));
-                                };
-                                if let Some(rule) = RenameRule::from_str(&string.value()) {
-                                    rename_all = Some(rule);
-                                }
+                        match string.value().as_ref() {
+                            UNION_TYPE_DENSE => {
+                                is_dense = Some(true);
                                 Ok(())
-                            } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
-                                let value = nested.value()?;
-                                let Lit::Str(string) = value.parse()? else {
-                                    return Err(nested.error("Unexpected value for list_element_name"));
-                                };
-                                list_element_name = Some(string.value());
-                                Ok(())
-                            } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
-                                nested.parse_nested_meta(|entry| {
-                                    let key = metadata_key(&entry.path)?;
-                                    let value = entry.value()?;
-                                    let Lit::Str(string) = value.parse()? else {
-                                        return Err(entry.error("Expected string value for metadata entry"));
-                                    };
-                                    list_element_metadata.push((key, string.value()));
-                                    Ok(())
-                                })
-                            } else {
-                                Err(meta.error("Unexpected attribute"))
                             }
-                        })?;
-                    };
-
-                    Ok(())
-                });
+                            UNION_TYPE_SPARSE => {
+                                is_dense = Some(false);
+                                Ok(())
+                            }
+                            _ => Err(nested.error("Unexpected value for mode")),
+                        }
+                    } else if nested.path.is_ident(FIELD_RENAME_ALL) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected value for rename_all"));
+                        };
+                        if let Some(rule) = RenameRule::from_str(&string.value()) {
+                            rename_all = Some(rule);
+                        }
+                        Ok(())
+                    } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected value for list_element_name"));
+                        };
+                        list_element_name = Some(string.value());
+                        Ok(())
+                    } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
+                        nested.parse_nested_meta(|entry| {
+                            let key = metadata_key(&entry.path)?;
+                            let value = entry.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(entry.error("Expected string value for metadata entry"));
+                            };
+                            list_element_metadata.push((key, string.value()));
+                            Ok(())
+                        })
+                    } else {
+                        Err(nested.error("Unexpected attribute"))
+                    }
+                }) {
+                    abort!(err.span(), "{}", err);
+                }
             }
         }
 
@@ -199,59 +195,57 @@ impl FieldAttrs {
 
         for attr in input {
             if attr.path().is_ident(ARROW_FIELD) {
-                attr.parse_nested_meta(|meta| {
-                    let Meta::List(list) = &attr.meta else {
-                        return Err(meta.error("Unexpected attribute"));
-                    };
-
-                    list.parse_nested_meta(|nested| {
-                        if nested.path.is_ident(FIELD_SKIP) {
-                            skip = true;
-                        } else if nested.path.is_ident(FIELD_TYPE) {
-                            let value = nested.value()?;
-                            let Lit::Str(string) = value.parse()? else {
-                                return Err(meta.error("Unexpected attribute"));
-                            };
-                            field_type = Some(syn::parse_str(&string.value())?);
-                        } else if nested.path.is_ident(FIELD_NAME) {
-                            let value = nested.value()?;
-                            let Lit::Str(string) = value.parse()? else {
-                                return Err(meta.error("Unexpected attribute"));
-                            };
-                            field_name = Some(string.value());
-                        } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
-                            let value = nested.value()?;
-                            let Lit::Str(string) = value.parse()? else {
-                                return Err(meta.error("Unexpected attribute"));
-                            };
-                            list_element_name = Some(string.value());
-                        } else if nested.path.is_ident(FIELD_METADATA) {
-                            nested.parse_nested_meta(|entry| {
-                                let key = metadata_key(&entry.path)?;
-                                let value = entry.value()?;
-                                let Lit::Str(string) = value.parse()? else {
-                                    return Err(entry.error("Expected string value for metadata entry"));
-                                };
-                                metadata.push((key, string.value()));
-                                Ok(())
-                            })?;
-                        } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
-                            nested.parse_nested_meta(|entry| {
-                                let key = metadata_key(&entry.path)?;
-                                let value = entry.value()?;
-                                let Lit::Str(string) = value.parse()? else {
-                                    return Err(entry.error("Expected string value for metadata entry"));
-                                };
-                                list_element_metadata.push((key, string.value()));
-                                Ok(())
-                            })?;
-                        } else {
-                            return Err(meta.error("Unexpected attribute"));
-                        }
+                if let Err(err) = attr.parse_nested_meta(|nested| {
+                    if nested.path.is_ident(FIELD_SKIP) {
+                        skip = true;
                         Ok(())
-                    })
-                })
-                .unwrap_or_default();
+                    } else if nested.path.is_ident(FIELD_TYPE) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected attribute"));
+                        };
+                        field_type = Some(syn::parse_str(&string.value())?);
+                        Ok(())
+                    } else if nested.path.is_ident(FIELD_NAME) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected attribute"));
+                        };
+                        field_name = Some(string.value());
+                        Ok(())
+                    } else if nested.path.is_ident(FIELD_LIST_ELEMENT_NAME) {
+                        let value = nested.value()?;
+                        let Lit::Str(string) = value.parse()? else {
+                            return Err(nested.error("Unexpected attribute"));
+                        };
+                        list_element_name = Some(string.value());
+                        Ok(())
+                    } else if nested.path.is_ident(FIELD_METADATA) {
+                        nested.parse_nested_meta(|entry| {
+                            let key = metadata_key(&entry.path)?;
+                            let value = entry.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(entry.error("Expected string value for metadata entry"));
+                            };
+                            metadata.push((key, string.value()));
+                            Ok(())
+                        })
+                    } else if nested.path.is_ident(FIELD_LIST_ELEMENT_METADATA) {
+                        nested.parse_nested_meta(|entry| {
+                            let key = metadata_key(&entry.path)?;
+                            let value = entry.value()?;
+                            let Lit::Str(string) = value.parse()? else {
+                                return Err(entry.error("Expected string value for metadata entry"));
+                            };
+                            list_element_metadata.push((key, string.value()));
+                            Ok(())
+                        })
+                    } else {
+                        Err(nested.error("Unexpected attribute"))
+                    }
+                }) {
+                    abort!(err.span(), "{}", err);
+                }
             }
         }
 
@@ -361,13 +355,12 @@ impl DeriveField {
 }
 
 fn merge_metadata_entries(base: &[(String, String)], overrides: &[(String, String)]) -> Vec<(String, String)> {
-    let mut merged = base.to_vec();
-    for (key, value) in overrides {
-        if let Some((_, existing_value)) = merged.iter_mut().find(|(k, _)| k == key) {
-            *existing_value = value.clone();
-        } else {
-            merged.push((key.clone(), value.clone()));
+    let mut merged: Vec<(String, String)> = Vec::new();
+    for (key, value) in base.iter().chain(overrides.iter()) {
+        if let Some(existing_idx) = merged.iter().position(|(k, _)| k == key) {
+            merged.remove(existing_idx);
         }
+        merged.push((key.clone(), value.clone()));
     }
     merged
 }
