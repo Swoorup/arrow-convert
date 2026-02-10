@@ -1,13 +1,17 @@
 use proc_macro2::Span;
 use proc_macro_error2::abort;
+use quote::format_ident;
 
 use syn::spanned::Spanned;
 use syn::{DeriveInput, Ident, Lit, Meta, Visibility};
+
+use crate::case::RenameRule;
 
 pub const ARROW_FIELD: &str = "arrow_field";
 pub const FIELD_TYPE: &str = "type";
 pub const FIELD_NAME: &str = "name";
 pub const FIELD_SKIP: &str = "skip";
+pub const FIELD_RENAME_ALL: &str = "rename_all";
 pub const UNION_TYPE: &str = "type";
 pub const UNION_TYPE_SPARSE: &str = "sparse";
 pub const UNION_TYPE_DENSE: &str = "dense";
@@ -25,6 +29,8 @@ pub struct DeriveStruct {
     /// The list of fields in the struct
     pub fields: Vec<DeriveField>,
     pub is_transparent: bool,
+    /// Container-level rename_all rule
+    pub rename_all: Option<RenameRule>,
 }
 
 pub struct DeriveEnum {
@@ -32,12 +38,16 @@ pub struct DeriveEnum {
     /// The list of variants in the enum
     pub variants: Vec<DeriveVariant>,
     pub is_dense: bool,
+    /// Container-level rename_all rule
+    pub rename_all: Option<RenameRule>,
 }
 
 /// All container attributes
 pub struct ContainerAttrs {
     pub is_dense: Option<bool>,
     pub transparent: Option<Span>,
+    /// Container-level rename_all rule
+    pub rename_all: Option<RenameRule>,
 }
 
 /// All field attributes
@@ -85,6 +95,7 @@ impl ContainerAttrs {
     pub fn from_ast(attrs: &[syn::Attribute]) -> ContainerAttrs {
         let mut is_dense: Option<bool> = None;
         let mut is_transparent: Option<Span> = None;
+        let mut rename_all: Option<RenameRule> = None;
 
         for attr in attrs {
             if attr.path().is_ident(ARROW_FIELD) {
@@ -111,6 +122,15 @@ impl ContainerAttrs {
                                     }
                                     _ => Err(nested.error("Unexpected value for mode")),
                                 }
+                            } else if nested.path.is_ident(FIELD_RENAME_ALL) {
+                                let value = nested.value()?;
+                                let Lit::Str(string) = value.parse()? else {
+                                    return Err(nested.error("Unexpected value for rename_all"));
+                                };
+                                if let Some(rule) = RenameRule::from_str(&string.value()) {
+                                    rename_all = Some(rule);
+                                }
+                                Ok(())
                             } else {
                                 Err(meta.error("Unexpected attribute"))
                             }
@@ -125,6 +145,7 @@ impl ContainerAttrs {
         ContainerAttrs {
             is_dense,
             transparent: is_transparent,
+            rename_all,
         }
     }
 }
@@ -193,6 +214,7 @@ impl DeriveStruct {
             common,
             fields: ast.fields.iter().map(DeriveField::from_ast).collect::<Vec<_>>(),
             is_transparent,
+            rename_all: container_attrs.rename_all,
         }
     }
 }
@@ -208,6 +230,7 @@ impl DeriveEnum {
             is_dense: container_attrs
                 .is_dense
                 .unwrap_or_else(|| abort!(input.span(), "Missing mode attribute for enum")),
+            rename_all: container_attrs.rename_all,
         }
     }
 }
@@ -222,6 +245,28 @@ impl DeriveField {
             field_name: attrs.field_name,
             skip: attrs.skip,
         }
+    }
+
+    /// Get the effective field name considering precedence:
+    /// arrow_field(name) > rename_all applied to rust name > rust name
+    pub fn effective_name(&self, index: usize, rename_all: Option<RenameRule>) -> String {
+        // 1. arrow_field(name = "...") takes highest precedence
+        if let Some(name) = &self.field_name {
+            return name.clone();
+        }
+
+        // 2. Get rust field name (using format_ident to strip r# prefix from raw identifiers)
+        let rust_name = match self.syn.ident.as_ref() {
+            Some(ident) => format_ident!("{}", ident).to_string(),
+            None => return format!("field_{}", index), // tuple struct
+        };
+
+        // 3. Apply container-level rename_all if present
+        if let Some(rule) = rename_all {
+            return rule.apply(&rust_name);
+        }
+
+        rust_name
     }
 }
 
@@ -248,5 +293,19 @@ impl DeriveVariant {
             field_type: attrs.field_type.unwrap_or_else(|| field_type.clone()),
             is_unit,
         }
+    }
+
+    /// Get the effective variant name considering precedence:
+    /// rename_all applied to rust name > rust name
+    pub fn effective_name(&self, rename_all: Option<RenameRule>) -> String {
+        // Use format_ident to strip r# prefix from raw identifiers (for consistency)
+        let rust_name = format_ident!("{}", self.syn.ident).to_string();
+
+        // Apply container-level rename_all if present
+        if let Some(rule) = rename_all {
+            return rule.apply(&rust_name);
+        }
+
+        rust_name
     }
 }

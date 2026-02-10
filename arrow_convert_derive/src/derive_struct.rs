@@ -83,13 +83,7 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
         let field_names = fields
             .iter()
             .enumerate()
-            .map(
-                |(id, field)| match (field.field_name.as_ref(), field.syn.ident.as_ref()) {
-                    (Some(name), _) => name.to_owned(),                         // override enabled
-                    (_, Some(ident)) => format_ident!("{}", ident).to_string(), // no override, named field
-                    (_, None) => format!("field_{id}"),                         // no override, unnamed field
-                },
-            )
+            .map(|(id, field)| field.effective_name(id, input.rename_all))
             .collect::<Vec<_>>();
 
         Self {

@@ -20,7 +20,7 @@ fn test_dense_enum_unit_variant() {
     assert_eq!(
         b.data_type(),
         &DataType::Union(
-            UnionFields::new(
+            UnionFields::try_new(
                 vec![0, 1, 2, 3],
                 vec![
                     Field::new("VAL1", DataType::Boolean, false),
@@ -28,7 +28,8 @@ fn test_dense_enum_unit_variant() {
                     Field::new("VAL3", DataType::Boolean, false),
                     Field::new("VAL4", DataType::Boolean, false),
                 ]
-            ),
+            )
+            .unwrap(),
             UnionMode::Dense
         )
     );
@@ -52,7 +53,7 @@ fn test_sparse_enum_unit_variant() {
     assert_eq!(
         b.data_type(),
         &DataType::Union(
-            UnionFields::new(
+            UnionFields::try_new(
                 vec![0, 1, 2, 3],
                 vec![
                     Field::new("VAL1", DataType::Boolean, false),
@@ -60,7 +61,8 @@ fn test_sparse_enum_unit_variant() {
                     Field::new("VAL3", DataType::Boolean, false),
                     Field::new("VAL4", DataType::Boolean, false),
                 ]
-            ),
+            )
+            .unwrap(),
             UnionMode::Sparse
         )
     );

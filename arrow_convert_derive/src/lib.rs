@@ -1,5 +1,6 @@
 use proc_macro_error2::{abort, proc_macro_error};
 
+mod case;
 mod derive_enum;
 mod derive_struct;
 mod input;

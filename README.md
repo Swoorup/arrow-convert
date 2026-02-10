@@ -81,6 +81,26 @@ Enums are still an experimental feature and need to be integrated tested. Rust e
 
 - Rust unit variants are represented using as the `bool` data type.
 
+### Field Renaming
+
+Arrow field names can be customized using `#[arrow_field(name = "...")]` at the field level or `#[arrow_field(rename_all = "...")]` at the container level:
+
+```rust
+# use arrow_convert::{ArrowField, ArrowSerialize, ArrowDeserialize};
+#[derive(ArrowField, ArrowSerialize, ArrowDeserialize)]
+#[arrow_field(rename_all = "camelCase")]
+struct MyStruct {
+    user_name: String,           // -> "userName"
+    #[arrow_field(name = "ID")]  // explicit override
+    user_id: i64,                // -> "ID"
+    item_count: i32,             // -> "itemCount"
+}
+```
+
+Precedence: `#[arrow_field(name)]` > `rename_all` > Rust field name.
+
+Supported `rename_all` values: `lowercase`, `UPPERCASE`, `camelCase`, `PascalCase`, `snake_case`, `SCREAMING_SNAKE_CASE`, `kebab-case`, `SCREAMING-KEBAB-CASE`.
+
 ### i128
 
 i128 represents a decimal number and requires the precision and scale to be specified to be used as an Arrow data type. The precision and scale can be specified by using a type override via the `I128` type. 
