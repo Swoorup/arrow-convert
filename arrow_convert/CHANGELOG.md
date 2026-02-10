@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.11.2...arrow_convert-v0.11.3) - 2026-02-10
+
+### Added
+
+- add tests for list element metadata and error handling in ArrowField
+- add support for field metadata and list element annotations in ArrowField
+
 ## [0.11.2](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.11.1...arrow_convert-v0.11.2) - 2026-02-10
 
 ### Added
