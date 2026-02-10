@@ -1,0 +1,5 @@
+error: Unexpected value for mode
+ --> tests/ui/enum_unexpected_mode_value.rs:4:15
+  |
+4 | #[arrow_field(type = "invalid_mode")]
+  |               ^^^^

@@ -9,6 +9,65 @@ use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 /// The default field name used when a specific name is not provided.
 pub const DEFAULT_FIELD_NAME: &str = "_item";
 
+/// Overrides the element field name for list-like datatypes on the given field.
+///
+/// This only affects the direct child field of:
+/// - `DataType::List`
+/// - `DataType::LargeList`
+/// - `DataType::FixedSizeList`
+///
+/// For other datatypes, this function is a no-op.
+pub fn with_list_element_name(field: Field, list_element_name: Option<&str>) -> Field {
+    let Some(list_element_name) = list_element_name else {
+        return field;
+    };
+
+    match field.data_type().clone() {
+        DataType::List(child) => field.with_data_type(DataType::List(Arc::new(
+            child.as_ref().clone().with_name(list_element_name),
+        ))),
+        DataType::LargeList(child) => field.with_data_type(DataType::LargeList(Arc::new(
+            child.as_ref().clone().with_name(list_element_name),
+        ))),
+        DataType::FixedSizeList(child, size) => field.with_data_type(DataType::FixedSizeList(
+            Arc::new(child.as_ref().clone().with_name(list_element_name)),
+            size,
+        )),
+        _ => field,
+    }
+}
+
+/// Adds or overrides metadata entries on a field.
+pub fn with_field_metadata(mut field: Field, metadata: Vec<(String, String)>) -> Field {
+    for (key, value) in metadata {
+        field.metadata_mut().insert(key, value);
+    }
+    field
+}
+
+/// Adds or overrides metadata entries on the list-like element child field.
+pub fn with_list_element_metadata(field: Field, metadata: Vec<(String, String)>) -> Field {
+    if metadata.is_empty() {
+        return field;
+    }
+
+    match field.data_type().clone() {
+        DataType::List(child) => {
+            let child = with_field_metadata(child.as_ref().clone(), metadata);
+            field.with_data_type(DataType::List(Arc::new(child)))
+        }
+        DataType::LargeList(child) => {
+            let child = with_field_metadata(child.as_ref().clone(), metadata);
+            field.with_data_type(DataType::LargeList(Arc::new(child)))
+        }
+        DataType::FixedSizeList(child, size) => {
+            let child = with_field_metadata(child.as_ref().clone(), metadata);
+            field.with_data_type(DataType::FixedSizeList(Arc::new(child), size))
+        }
+        _ => field,
+    }
+}
+
 /// Trait implemented by all types that can be used as an Arrow field.
 ///
 /// Implementations are provided for types already supported by the arrow crate:

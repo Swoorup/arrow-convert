@@ -1,0 +1,5 @@
+error: Expected string value for metadata entry
+ --> tests/ui/struct_metadata_value_not_string.rs:5:28
+  |
+5 |     #[arrow_field(metadata(role = 1))]
+  |                            ^^^^

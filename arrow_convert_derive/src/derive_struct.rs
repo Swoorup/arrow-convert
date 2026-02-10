@@ -14,6 +14,9 @@ struct Common<'a> {
     field_indices: Vec<syn::LitInt>,
     field_types: Vec<&'a syn::Type>,
     field_names: Vec<String>,
+    field_list_element_names: Vec<Option<String>>,
+    field_metadata: Vec<Vec<(String, String)>>,
+    field_list_element_metadata: Vec<Vec<(String, String)>>,
 }
 
 impl<'a> From<&'a DeriveStruct> for Common<'a> {
@@ -85,6 +88,15 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             .enumerate()
             .map(|(id, field)| field.effective_name(id, input.rename_all))
             .collect::<Vec<_>>();
+        let field_list_element_names = fields
+            .iter()
+            .map(|field| field.effective_list_element_name(input.list_element_name.as_deref()))
+            .collect::<Vec<_>>();
+        let field_metadata = fields.iter().map(|field| field.metadata.clone()).collect::<Vec<_>>();
+        let field_list_element_metadata = fields
+            .iter()
+            .map(|field| field.effective_list_element_metadata(&input.list_element_metadata))
+            .collect::<Vec<_>>();
 
         Self {
             original_name,
@@ -95,6 +107,9 @@ impl<'a> From<&'a DeriveStruct> for Common<'a> {
             field_indices,
             field_types,
             field_names,
+            field_list_element_names,
+            field_metadata,
+            field_list_element_metadata,
         }
     }
 }
@@ -104,8 +119,38 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
         original_name,
         field_types,
         field_names,
+        field_list_element_names,
+        field_metadata,
+        field_list_element_metadata,
         ..
     } = (&input).into();
+    let field_list_element_name_exprs = field_list_element_names
+        .iter()
+        .map(|name| match name {
+            Some(name) => quote!(Some(#name)),
+            None => quote!(None),
+        })
+        .collect::<Vec<_>>();
+    let field_metadata_exprs = field_metadata
+        .iter()
+        .map(|entries| {
+            let entries = entries
+                .iter()
+                .map(|(k, v)| quote!((#k.to_string(), #v.to_string())))
+                .collect::<Vec<_>>();
+            quote!(vec![#(#entries),*])
+        })
+        .collect::<Vec<_>>();
+    let field_list_element_metadata_exprs = field_list_element_metadata
+        .iter()
+        .map(|entries| {
+            let entries = entries
+                .iter()
+                .map(|(k, v)| quote!((#k.to_string(), #v.to_string())))
+                .collect::<Vec<_>>();
+            quote!(vec![#(#entries),*])
+        })
+        .collect::<Vec<_>>();
 
     let arrow_schema_impl = if input.fields.len() == 1 && input.is_transparent {
         quote! {}
@@ -115,7 +160,21 @@ pub fn expand_field(input: DeriveStruct) -> TokenStream {
             pub fn arrow_schema() -> arrow::datatypes::Schema {
                 arrow::datatypes::Schema::new(vec![
                     #(
-                        <#field_types as arrow_convert::field::ArrowField>::field(#field_names),
+                        {
+                            let field = <#field_types as arrow_convert::field::ArrowField>::field(#field_names);
+                            let field = arrow_convert::field::with_list_element_name(
+                                field,
+                                #field_list_element_name_exprs,
+                            );
+                            let field = arrow_convert::field::with_field_metadata(
+                                field,
+                                #field_metadata_exprs,
+                            );
+                            arrow_convert::field::with_list_element_metadata(
+                                field,
+                                #field_list_element_metadata_exprs,
+                            )
+                        },
                     )*
                 ])
             }
