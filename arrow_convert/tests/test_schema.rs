@@ -3,7 +3,8 @@ use std::sync::Arc;
 use arrow::datatypes::*;
 use arrow_convert::{
     field::{with_list_element_metadata, with_list_element_name, DEFAULT_FIELD_NAME},
-    ArrowField,
+    serialize::TryIntoArrow,
+    ArrowField, ArrowSerialize,
 };
 use pretty_assertions::assert_eq;
 
@@ -446,4 +447,35 @@ fn test_with_list_element_helpers_for_large_and_fixed_size_lists() {
     assert_eq!(*size, 3);
     assert_eq!(fixed_element.name(), "level");
     assert_eq!(fixed_element.metadata().get("kind"), Some(&"depth".to_string()));
+}
+
+#[test]
+fn test_serialize_respects_list_element_name_and_metadata() {
+    #[derive(Debug, ArrowField, ArrowSerialize)]
+    #[allow(dead_code)]
+    #[arrow_field(list_element_metadata(scope = "container"))]
+    struct Root {
+        #[arrow_field(list_element_name = "level", list_element_metadata(PARQUET::field_id = "9"))]
+        bids: Vec<i64>,
+    }
+
+    let rows = vec![Root { bids: vec![1, 2, 3] }];
+    let array: arrow::array::ArrayRef = rows.try_into_arrow().expect("serialization should succeed");
+    let struct_array = array
+        .as_any()
+        .downcast_ref::<arrow::array::StructArray>()
+        .expect("expected StructArray");
+
+    let fields = struct_array.fields();
+    let bids = &fields[0];
+    let DataType::List(element) = bids.data_type() else {
+        panic!("expected list datatype");
+    };
+
+    assert_eq!(element.name(), "level");
+    assert_eq!(element.metadata().get("scope"), Some(&"container".to_string()));
+    assert_eq!(
+        element.metadata().get("PARQUET:field_id"),
+        Some(&"9".to_string())
+    );
 }

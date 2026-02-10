@@ -295,6 +295,31 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
                 }
                 Ok(())
             }
+
+            fn align_struct_values(
+                values: Vec<arrow::array::ArrayRef>,
+                fields: &arrow::datatypes::Fields,
+            ) -> Vec<arrow::array::ArrayRef> {
+                values
+                    .into_iter()
+                    .zip(fields.iter())
+                    .map(|(value, field)| {
+                        if value.data_type() == field.data_type() {
+                            value
+                        } else {
+                            arrow::compute::cast(value.as_ref(), field.data_type()).unwrap_or_else(|e| {
+                                panic!(
+                                    "failed to cast field '{}' from {:?} to {:?}: {}",
+                                    field.name(),
+                                    value.data_type(),
+                                    field.data_type(),
+                                    e
+                                )
+                            })
+                        }
+                    })
+                    .collect()
+            }
         }
     };
 
@@ -346,6 +371,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
                   .clone() else {
                     panic!("datatype is not struct")
                   };
+                let values = #mutable_array_name::align_struct_values(values, &fields);
 
                 std::sync::Arc::new(arrow::array::StructArray::new(
                     fields,
@@ -364,6 +390,7 @@ pub fn expand_serialize(input: DeriveStruct) -> TokenStream {
                   .clone() else {
                     panic!("datatype is not struct")
                   };
+                let values = #mutable_array_name::align_struct_values(values, &fields);
 
                 std::sync::Arc::new(arrow::array::StructArray::new(
                     fields,
