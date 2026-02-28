@@ -7,5 +7,5 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-arrow = { workspace = true }
+arrow-array = { workspace = true }
 arrow_convert = { workspace = true }

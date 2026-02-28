@@ -3,7 +3,7 @@
 fn test_vec3_roundtrip() {
     use glam::*;
 
-    use arrow::array::{Array, ArrayRef};
+    use arrow_array::{Array, ArrayRef};
     use arrow_convert::deserialize::TryIntoCollection;
     use arrow_convert::serialize::TryIntoArrow;
     use arrow_convert::{ArrowDeserialize, ArrowField, ArrowSerialize};
@@ -76,11 +76,8 @@ fn test_vec3_roundtrip() {
     // Serialize to Arrow
     let arrow_array: ArrayRef = original.try_into_arrow().unwrap();
 
-    assert!(arrow_array.as_any().is::<arrow::array::StructArray>());
-    let struct_array = arrow_array
-        .as_any()
-        .downcast_ref::<arrow::array::StructArray>()
-        .unwrap();
+    assert!(arrow_array.as_any().is::<arrow_array::StructArray>());
+    let struct_array = arrow_array.as_any().downcast_ref::<arrow_array::StructArray>().unwrap();
 
     // Verify the number of fields in the struct
     assert_eq!(struct_array.num_columns(), 15);
@@ -95,7 +92,7 @@ fn test_vec3_roundtrip() {
 #[cfg(feature = "glam")]
 #[test]
 fn test_glam_edge_values() {
-    use arrow::array::{Array, ArrayRef};
+    use arrow_array::{Array, ArrayRef};
     use arrow_convert::deserialize::TryIntoCollection;
     use arrow_convert::serialize::TryIntoArrow;
     use arrow_convert::{ArrowDeserialize, ArrowField, ArrowSerialize};
@@ -174,11 +171,8 @@ fn test_glam_edge_values() {
     }];
 
     let arrow_array: ArrayRef = original.try_into_arrow().expect("Failed to convert to Arrow array");
-    assert!(arrow_array.as_any().is::<arrow::array::StructArray>());
-    let struct_array = arrow_array
-        .as_any()
-        .downcast_ref::<arrow::array::StructArray>()
-        .unwrap();
+    assert!(arrow_array.as_any().is::<arrow_array::StructArray>());
+    let struct_array = arrow_array.as_any().downcast_ref::<arrow_array::StructArray>().unwrap();
 
     assert_eq!(struct_array.num_columns(), 15);
 

@@ -1,5 +1,5 @@
-use proc_macro2::TokenStream;
 use proc_macro_error2::abort;
+use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
 
@@ -26,9 +26,9 @@ impl<'a> From<&'a DeriveEnum> for Common<'a> {
         let variants = &input.variants;
 
         let union_type = if is_dense {
-            quote!(arrow::datatypes::UnionMode::Dense)
+            quote!(arrow_convert::_private::arrow_schema::UnionMode::Dense)
         } else {
-            quote!(arrow::datatypes::UnionMode::Sparse)
+            quote!(arrow_convert::_private::arrow_schema::UnionMode::Sparse)
         };
 
         let variant_names = variants.iter().map(|v| v.syn.ident.clone()).collect::<Vec<_>>();
@@ -93,9 +93,9 @@ pub fn expand_field(input: DeriveEnum) -> TokenStream {
         impl arrow_convert::field::ArrowField for #original_name {
             type Type = Self;
 
-            fn data_type() -> arrow::datatypes::DataType {
-                arrow::datatypes::DataType::Union(
-                    arrow::datatypes::UnionFields::new(
+            fn data_type() -> arrow_convert::_private::arrow_schema::DataType {
+                arrow_convert::_private::arrow_schema::DataType::Union(
+                    arrow_convert::_private::arrow_schema::UnionFields::new(
                       0..#num_variants, // basically union tag id or here called type_id
                       vec![
                           #(
@@ -137,8 +137,8 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             quote! { offsets: Vec<i32>, },
             quote! { offsets: vec![], },
             quote! { self.offsets.reserve(additional); },
-            quote! { Some(arrow::buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.offsets))) },
-            quote! { Some(self.offsets.iter().cloned().collect::<arrow::buffer::ScalarBuffer<i32>>()) },
+            quote! { Some(arrow_convert::_private::arrow_buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.offsets))) },
+            quote! { Some(self.offsets.iter().cloned().collect::<arrow_convert::_private::arrow_buffer::ScalarBuffer<i32>>()) },
             quote! { self.offsets.shrink_to_fit(); },
         )
     } else {
@@ -240,7 +240,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             #(
                 #variant_names: #mutable_variant_array_types,
             )*
-            data_type: arrow::datatypes::DataType,
+            data_type: arrow_convert::_private::arrow_schema::DataType,
             type_ids: Vec<i8>,
             #offsets_decl
         }
@@ -257,7 +257,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 }
             }
 
-            fn data_type(&self) -> &arrow::datatypes::DataType {
+            fn data_type(&self) -> &arrow_convert::_private::arrow_schema::DataType {
                 &self.data_type
             }
 
@@ -266,7 +266,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 self.try_push(None::<#original_name>).unwrap();
             }
 
-            fn validity(&self) -> Option<&arrow::array::BooleanBufferBuilder> {
+            fn validity(&self) -> Option<&arrow_convert::_private::arrow_array::builder::BooleanBufferBuilder> {
                 None
             }
 
@@ -280,7 +280,8 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 #offsets_reserve
             }
 
-            fn try_push(&mut self, item: Option<impl std::borrow::Borrow<#original_name>>) -> arrow::error::Result<()> {
+            fn try_push(&mut self, item: Option<impl std::borrow::Borrow<#original_name>>) -> std::result::Result<(), arrow_convert::_private::arrow_schema::ArrowError> {
+              use arrow_convert::_private::arrow_array::builder::ArrayBuilder;
               use arrow_convert::serialize::{ArrowSerialize, PushNull};
                 match item {
                     Some(i) => {
@@ -297,8 +298,8 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 Ok(())
             }
 
-            // fn try_extend<I: arrow_convert::deserialize::ArrowArrayIterable<Item = Option<__T>>>(&mut self, iter: impl arrow_convert::deserialize::ArrowArrayIterable<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> arrow::error::Result<()> {
-            fn try_extend(&mut self, iter: impl IntoIterator<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> arrow::error::Result<()> {
+            // fn try_extend<I: arrow_convert::deserialize::ArrowArrayIterable<Item = Option<__T>>>(&mut self, iter: impl arrow_convert::deserialize::ArrowArrayIterable<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> std::result::Result<(), arrow_convert::_private::arrow_schema::ArrowError> {
+            fn try_extend(&mut self, iter: impl IntoIterator<Item = Option<impl std::borrow::Borrow<#original_name>>>) -> std::result::Result<(), arrow_convert::_private::arrow_schema::ArrowError> {
                 use arrow_convert::serialize::PushNull;
                 for i in iter {
                     self.try_push(i)?;
@@ -328,6 +329,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
     let array_push_null_impl = quote! {
         impl arrow_convert::serialize::PushNull for #mutable_array_name {
           fn push_null(&mut self) {
+            use arrow_convert::_private::arrow_array::builder::ArrayBuilder;
             use arrow_convert::serialize::PushNull;
             #push_null_impl
           }
@@ -343,25 +345,25 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
     };
 
     let array_mutable_array_impl = quote! {
-        impl arrow::array::ArrayBuilder for #mutable_array_name {
+        impl arrow_convert::_private::arrow_array::builder::ArrayBuilder for #mutable_array_name {
             fn len(&self) -> usize {
                 self.type_ids.len()
             }
 
-            fn finish(&mut self) -> arrow::array::ArrayRef {
-                let arrow::datatypes::DataType::Union(union_fields, _) =
+            fn finish(&mut self) -> arrow_convert::_private::arrow_array::ArrayRef {
+                let arrow_convert::_private::arrow_schema::DataType::Union(union_fields, _) =
                   <#original_name as arrow_convert::field::ArrowField>::data_type()
                   .clone() else {
                     panic!("datatype is not a union")
                   };
 
                 let children = vec![#(
-                    <#mutable_variant_array_types as arrow::array::ArrayBuilder>::finish(&mut self.#variant_names),
+                    <#mutable_variant_array_types as arrow_convert::_private::arrow_array::builder::ArrayBuilder>::finish(&mut self.#variant_names),
                 )*];
 
-                let type_ids = arrow::buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.type_ids));
+                let type_ids = arrow_convert::_private::arrow_buffer::ScalarBuffer::from_iter(std::mem::take(&mut self.type_ids));
 
-                std::sync::Arc::new(arrow::array::UnionArray::try_new(
+                std::sync::Arc::new(arrow_convert::_private::arrow_array::UnionArray::try_new(
                     union_fields,
                     type_ids,
                     #offsets_take,
@@ -369,20 +371,20 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
                 ).unwrap())
             }
 
-            fn finish_cloned(&self) -> arrow::array::ArrayRef {
-                let arrow::datatypes::DataType::Union(union_fields, _) =
+            fn finish_cloned(&self) -> arrow_convert::_private::arrow_array::ArrayRef {
+                let arrow_convert::_private::arrow_schema::DataType::Union(union_fields, _) =
                   <#original_name as arrow_convert::field::ArrowField>::data_type()
                   .clone() else {
                     panic!("datatype is not a union")
                   };
 
                 let children = vec![#(
-                    <#mutable_variant_array_types as arrow::array::ArrayBuilder>::finish_cloned(&self.#variant_names),
+                    <#mutable_variant_array_types as arrow_convert::_private::arrow_array::builder::ArrayBuilder>::finish_cloned(&self.#variant_names),
                 )*];
 
-                let type_ids = self.type_ids.iter().cloned().collect::<arrow::buffer::ScalarBuffer<i8>>();
+                let type_ids = self.type_ids.iter().cloned().collect::<arrow_convert::_private::arrow_buffer::ScalarBuffer<i8>>();
 
-                std::sync::Arc::new(arrow::array::UnionArray::try_new(
+                std::sync::Arc::new(arrow_convert::_private::arrow_array::UnionArray::try_new(
                     union_fields,
                     type_ids,
                     #offsets_clone,
@@ -415,7 +417,7 @@ pub fn expand_serialize(input: DeriveEnum) -> TokenStream {
             }
 
             #[inline]
-            fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+            fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> std::result::Result<(), arrow_convert::_private::arrow_schema::ArrowError> {
                 array.try_push(Some(v))
             }
         }
@@ -484,16 +486,16 @@ pub fn expand_deserialize(input: DeriveEnum) -> TokenStream {
     let array_impl = quote! {
         impl arrow_convert::deserialize::ArrowArray for #array_name
         {
-            type BaseArrayType = arrow::array::UnionArray;
+            type BaseArrayType = arrow_convert::_private::arrow_array::UnionArray;
 
             #[inline]
-            fn iter_from_array_ref<'a>(b: &'a dyn arrow::array::Array)  -> <Self as arrow_convert::deserialize::ArrowArrayIterable>::Iter<'a>
+            fn iter_from_array_ref<'a>(b: &'a dyn arrow_convert::_private::arrow_array::Array)  -> <Self as arrow_convert::deserialize::ArrowArrayIterable>::Iter<'a>
             {
-                let arr = b.as_any().downcast_ref::<arrow::array::UnionArray>().unwrap();
+                let arr = b.as_any().downcast_ref::<arrow_convert::_private::arrow_array::UnionArray>().unwrap();
 
                 #iterator_name {
                     arr,
-                    index_iter: 0..arrow::array::Array::len(&arr),
+                    index_iter: 0..arrow_convert::_private::arrow_array::Array::len(&arr),
                 }
             }
         }
@@ -514,7 +516,7 @@ pub fn expand_deserialize(input: DeriveEnum) -> TokenStream {
     let array_iterator_decl = quote! {
         #[allow(non_snake_case)]
         #visibility struct #iterator_name<'a> {
-            arr: &'a arrow::array::UnionArray,
+            arr: &'a arrow_convert::_private::arrow_array::UnionArray,
             index_iter: std::ops::Range<usize>,
         }
     };

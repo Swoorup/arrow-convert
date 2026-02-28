@@ -11,7 +11,7 @@ The example below performs a round trip conversion of a struct with a single fie
 Please see the [complex_example.rs](https://github.com/Swoorup/arrow-convert/blob/main/arrow_convert/tests/complex_example.rs) for usage of the full functionality.
 
 ```rust
-use arrow::array::{Array, ArrayRef};
+use arrow_array::{Array, ArrayRef, StructArray};
 use arrow_convert::{deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowField, ArrowSerialize, ArrowDeserialize};
 
 #[derive(Debug, Clone, PartialEq, ArrowField, ArrowSerialize, ArrowDeserialize)]
@@ -30,8 +30,7 @@ let original_array = [
 let arrow_array: ArrayRef = original_array.try_into_arrow().unwrap();
 
 // which can be cast to an Arrow StructArray and be used for all kinds of IPC, FFI, etc.
-// supported by `arrow`
-let struct_array= arrow_array.as_any().downcast_ref::<arrow::array::StructArray>().unwrap();
+let struct_array = arrow_array.as_any().downcast_ref::<StructArray>().unwrap();
 assert_eq!(struct_array.len(), 3);
 
 // deserialize back to our original vector via TryIntoCollection trait.
@@ -154,7 +153,8 @@ struct S {
 A `vec<i128>` can be converted. to/from arrow by using the `arrow_serialize_to_mutable_array` and `arrow_array_deserialize_iterator_as_type` methods. 
 
 ```rust
-use arrow::array::{Array, ArrayBuilder, ArrayRef};
+use arrow_array::{Array, ArrayRef};
+use arrow_array::builder::ArrayBuilder;
 use arrow_convert::serialize::arrow_serialize_to_mutable_array;
 use arrow_convert::deserialize::arrow_array_deserialize_iterator_as_type;
 use arrow_convert::field::I128;

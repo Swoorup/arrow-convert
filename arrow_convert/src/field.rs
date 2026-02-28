@@ -93,7 +93,7 @@ pub trait ArrowField {
     #[inline]
     #[doc(hidden)]
     /// For internal use and not meant to be reimplemented.
-    /// returns the [`arrow::datatypes::Field`] for this field
+    /// returns the [`arrow_schema::Field`] for this field
     fn field(name: &str) -> Field {
         Field::new(name, Self::data_type(), Self::is_nullable())
     }

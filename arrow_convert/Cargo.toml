@@ -20,6 +20,7 @@ uuid = ["dep:uuid", "arrow-schema/canonical_extension_types"]
 [dependencies]
 arrow-array = { workspace = true }
 arrow-buffer = { workspace = true }
+arrow-cast = { workspace = true }
 arrow-data = { workspace = true }
 arrow-schema = { workspace = true }
 arrow_convert_derive = { workspace = true, optional = true }
@@ -34,7 +35,9 @@ tinystr = { workspace = true, optional = true }
 uuid = { workspace = true, optional = true }
 
 [dev-dependencies]
-arrow = { workspace = true }
+arrow-array = { workspace = true }
+arrow-buffer = { workspace = true }
+arrow-schema = { workspace = true }
 arrow_convert_derive = { workspace = true }
 criterion = { workspace = true }
 glam = { workspace = true }

@@ -1,13 +1,12 @@
 //! Tests for `chrono::DateTime<Utc>` support.
 use std::sync::Arc;
 
-use arrow::array::ArrayRef;
-use arrow::datatypes::*;
-use arrow::error::Result;
+use arrow_array::ArrayRef;
 use arrow_convert::deserialize::TryIntoCollection;
 use arrow_convert::field::{ArrowField, DEFAULT_FIELD_NAME};
 use arrow_convert::serialize::TryIntoArrow;
 use arrow_convert::{ArrowDeserialize, ArrowField, ArrowSerialize};
+use arrow_schema::*;
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use pretty_assertions::assert_eq;
 
@@ -98,8 +97,8 @@ fn test_naive_vs_utc_schema_differs() {
     );
 }
 
-fn data_mismatch_error<Expected: ArrowField, Actual: ArrowField>() -> arrow::error::ArrowError {
-    arrow::error::ArrowError::InvalidArgumentError(format!(
+fn data_mismatch_error<Expected: ArrowField, Actual: ArrowField>() -> ArrowError {
+    ArrowError::InvalidArgumentError(format!(
         "Data type mismatch. Expected type={:#?} is_nullable={}, but was type={:#?} is_nullable={}",
         Expected::data_type(),
         Expected::is_nullable(),
@@ -116,7 +115,7 @@ fn test_datetime_utc_to_naive_mismatch_error() {
     let arrow_array: ArrayRef = original_array.try_into_arrow().unwrap();
 
     // Attempting to deserialize as NaiveDateTime should fail
-    let result: Result<Vec<NaiveDateTime>> = arrow_array.try_into_collection();
+    let result: Result<Vec<NaiveDateTime>, ArrowError> = arrow_array.try_into_collection();
 
     assert_eq!(
         result.unwrap_err().to_string(),
@@ -135,7 +134,7 @@ fn test_naive_to_datetime_utc_mismatch_error() {
     let arrow_array: ArrayRef = original_array.try_into_arrow().unwrap();
 
     // Attempting to deserialize as DateTime<Utc> should fail
-    let result: Result<Vec<DateTime<Utc>>> = arrow_array.try_into_collection();
+    let result: Result<Vec<DateTime<Utc>>, ArrowError> = arrow_array.try_into_collection();
 
     assert_eq!(
         result.unwrap_err().to_string(),
@@ -288,7 +287,7 @@ fn test_struct_datetime_mismatch() {
     let arrow_array: ArrayRef = original.try_into_arrow().unwrap();
 
     // Attempting to deserialize as WithNaive should fail
-    let result: Result<Vec<WithNaive>> = arrow_array.try_into_collection();
+    let result: Result<Vec<WithNaive>, ArrowError> = arrow_array.try_into_collection();
 
     assert_eq!(
         result.unwrap_err().to_string(),

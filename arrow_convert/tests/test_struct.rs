@@ -1,5 +1,5 @@
-use arrow::array::*;
-use arrow_convert::{deserialize::*, serialize::*, ArrowDeserialize, ArrowField, ArrowSerialize};
+use arrow_array::*;
+use arrow_convert::{ArrowDeserialize, ArrowField, ArrowSerialize, deserialize::*, serialize::*};
 
 #[test]
 fn test_nested_optional_struct_array() {

@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
-use arrow::datatypes::*;
 use arrow_convert::{
-    field::{with_list_element_metadata, with_list_element_name, DEFAULT_FIELD_NAME},
-    serialize::TryIntoArrow,
     ArrowField, ArrowSerialize,
+    field::{DEFAULT_FIELD_NAME, with_list_element_metadata, with_list_element_name},
+    serialize::TryIntoArrow,
 };
+use arrow_schema::*;
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -460,10 +460,10 @@ fn test_serialize_respects_list_element_name_and_metadata() {
     }
 
     let rows = vec![Root { bids: vec![1, 2, 3] }];
-    let array: arrow::array::ArrayRef = rows.try_into_arrow().expect("serialization should succeed");
+    let array: arrow_array::ArrayRef = rows.try_into_arrow().expect("serialization should succeed");
     let struct_array = array
         .as_any()
-        .downcast_ref::<arrow::array::StructArray>()
+        .downcast_ref::<arrow_array::StructArray>()
         .expect("expected StructArray");
 
     let fields = struct_array.fields();

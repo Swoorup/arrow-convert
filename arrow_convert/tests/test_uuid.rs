@@ -1,7 +1,6 @@
 #[cfg(feature = "uuid")]
 mod uuid {
-    use arrow::array::{Array, ArrayRef};
-    use arrow::record_batch::RecordBatch;
+    use arrow_array::{Array, ArrayRef, RecordBatch};
     use arrow_convert::deserialize::*;
     use arrow_convert::field::ArrowField;
     use arrow_convert::serialize::*;
@@ -16,10 +15,7 @@ mod uuid {
         let array: ArrayRef = uuids.iter().collect::<Vec<_>>().try_into_arrow().unwrap();
         assert_eq!(array.len(), 2);
         assert_eq!(array.data_type(), &<Uuid as ArrowField>::data_type());
-        assert_eq!(
-            array.data_type(),
-            &arrow::datatypes::DataType::FixedSizeBinary(16)
-        );
+        assert_eq!(array.data_type(), &arrow_schema::DataType::FixedSizeBinary(16));
 
         let rb: RecordBatch = uuids.iter().collect::<Vec<_>>().try_into_arrow().unwrap();
         assert_eq!(rb.num_rows(), 2);

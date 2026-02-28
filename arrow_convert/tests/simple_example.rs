@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 /// Simple example
-use arrow::array::Array;
+use arrow_array::Array;
 use arrow_convert::{
-    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField, ArrowSerialize,
+    ArrowDeserialize, ArrowField, ArrowSerialize, deserialize::TryIntoCollection, serialize::TryIntoArrow,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, ArrowField, ArrowSerialize, ArrowDeserialize)]
@@ -30,10 +30,7 @@ fn test_simple_roundtrip() {
 
     // which can be cast to an Arrow StructArray and be used for all kinds of IPC, FFI, etc.
     // supported by `arrow`
-    let struct_array = arrow_array
-        .as_any()
-        .downcast_ref::<arrow::array::StructArray>()
-        .unwrap();
+    let struct_array = arrow_array.as_any().downcast_ref::<arrow_array::StructArray>().unwrap();
     assert_eq!(struct_array.len(), 3);
 
     // deserialize back to our original vector via TryIntoCollection trait.

@@ -1,7 +1,8 @@
-use arrow::{array::*, datatypes::*};
+use arrow_array::*;
 use arrow_convert::{
-    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField, ArrowSerialize,
+    ArrowDeserialize, ArrowField, ArrowSerialize, deserialize::TryIntoCollection, serialize::TryIntoArrow,
 };
+use arrow_schema::*;
 use pretty_assertions::assert_eq;
 
 #[test]
