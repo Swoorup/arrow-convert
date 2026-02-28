@@ -1,13 +1,12 @@
-use arrow::array::{Array, ArrayRef};
-use arrow::buffer::{Buffer, ScalarBuffer};
-use arrow::record_batch::RecordBatch;
+use arrow_array::{Array, ArrayRef, RecordBatch};
+use arrow_buffer::{Buffer, ScalarBuffer};
 use arrow_convert::field::{ArrowField, FixedSizeBinary};
 use arrow_convert::serialize::*;
 
 #[test]
 fn test_error_exceed_fixed_size_binary() {
     let strs = [b"abc".to_vec()];
-    let r: arrow::error::Result<ArrayRef> = strs.try_into_arrow_as_type::<FixedSizeBinary<2>>();
+    let r: Result<ArrayRef, arrow_schema::ArrowError> = strs.try_into_arrow_as_type::<FixedSizeBinary<2>>();
     assert!(r.is_err())
 }
 

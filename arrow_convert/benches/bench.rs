@@ -1,11 +1,9 @@
-use arrow::{
-    array::ArrayRef,
-    buffer::{Buffer, ScalarBuffer},
-};
+use arrow_array::ArrayRef;
+use arrow_buffer::{Buffer, ScalarBuffer};
 use arrow_convert::{
-    deserialize::TryIntoCollection, serialize::TryIntoArrow, ArrowDeserialize, ArrowField, ArrowSerialize,
+    ArrowDeserialize, ArrowField, ArrowSerialize, deserialize::TryIntoCollection, serialize::TryIntoArrow,
 };
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 // Arrow stores U8 arrays as `arrow::array::BinaryArray`
 #[derive(ArrowField, ArrowSerialize, ArrowDeserialize)]

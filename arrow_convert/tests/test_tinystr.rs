@@ -1,7 +1,7 @@
 #[cfg(feature = "tinystr")]
 #[test]
 fn test_tinyasciistr_roundtrip() {
-    use arrow::array::{Array, ArrayRef, FixedSizeBinaryArray};
+    use arrow_array::{Array, ArrayRef, FixedSizeBinaryArray};
     use arrow_convert::deserialize::TryIntoCollection;
     use arrow_convert::serialize::TryIntoArrow;
     use tinystr::TinyAsciiStr;
@@ -30,7 +30,7 @@ fn test_tinyasciistr_roundtrip() {
 #[cfg(feature = "tinystr")]
 #[test]
 fn test_tinyasciistr_max_length() {
-    use arrow::array::{Array, ArrayRef, FixedSizeBinaryArray};
+    use arrow_array::{Array, ArrayRef, FixedSizeBinaryArray};
     use arrow_convert::deserialize::TryIntoCollection;
     use arrow_convert::serialize::TryIntoArrow;
     use tinystr::TinyAsciiStr;

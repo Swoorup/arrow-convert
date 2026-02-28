@@ -7,9 +7,9 @@ use crate::serialize::ArrowSerialize;
 use arrow_schema::Field;
 
 use crate::deserialize::arrow_deserialize_vec_helper;
-use arrow_array::builder::{BooleanBuilder, Float32Builder, Float64Builder};
 use arrow_array::ArrayRef;
-use arrow_array::{builder::FixedSizeListBuilder, FixedSizeListArray};
+use arrow_array::builder::{BooleanBuilder, Float32Builder, Float64Builder};
+use arrow_array::{FixedSizeListArray, builder::FixedSizeListBuilder};
 use std::sync::Arc;
 
 /// This macro implements the `ArrowSerialize` and `ArrowDeserialize` traits for a given `glam` vector or matrix type.

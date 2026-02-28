@@ -2,7 +2,7 @@
 mod iterable;
 pub use iterable::*;
 
-use arrow_array::{types, ArrowPrimitiveType, *};
+use arrow_array::{ArrowPrimitiveType, types, *};
 use arrow_buffer::{ArrowNativeType, Buffer, ScalarBuffer};
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc};
 

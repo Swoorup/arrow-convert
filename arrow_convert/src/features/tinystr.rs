@@ -5,7 +5,7 @@ use crate::deserialize::ArrowDeserialize;
 use crate::field::ArrowField;
 use crate::serialize::ArrowSerialize;
 
-use arrow_array::{builder::FixedSizeBinaryBuilder, FixedSizeBinaryArray};
+use arrow_array::{FixedSizeBinaryArray, builder::FixedSizeBinaryBuilder};
 
 impl<const N: usize> ArrowField for TinyAsciiStr<N> {
     type Type = Self;

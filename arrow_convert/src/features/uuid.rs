@@ -8,9 +8,9 @@ use crate::deserialize::ArrowDeserialize;
 use crate::field::ArrowField;
 use crate::serialize::ArrowSerialize;
 use crate::serialize::PushNull;
-use arrow_array::builder::FixedSizeBinaryBuilder;
 use arrow_array::ArrayRef;
 use arrow_array::FixedSizeBinaryArray;
+use arrow_array::builder::FixedSizeBinaryBuilder;
 use arrow_schema::DataType;
 use uuid::Uuid;
 

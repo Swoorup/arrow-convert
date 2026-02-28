@@ -1,6 +1,5 @@
-use arrow::array::*;
-use arrow::datatypes::DataType;
-use arrow_convert::deserialize::{arrow_array_deserialize_iterator, TryIntoCollection};
+use arrow_array::*;
+use arrow_convert::deserialize::{TryIntoCollection, arrow_array_deserialize_iterator};
 use arrow_convert::field::ArrowField;
 use arrow_convert::serialize::TryIntoArrow;
 /// Complex example that uses the following features:
@@ -8,6 +7,7 @@ use arrow_convert::serialize::TryIntoArrow;
 /// - Deeply Nested structs and lists
 /// - Custom types
 use arrow_convert::{ArrowDeserialize, ArrowField, ArrowSerialize};
+use arrow_schema::DataType;
 use chrono::DateTime;
 use std::borrow::Borrow;
 
@@ -88,13 +88,13 @@ impl arrow_convert::field::ArrowField for CustomType {
     type Type = Self;
 
     #[inline]
-    fn data_type() -> arrow::datatypes::DataType {
-        arrow::datatypes::DataType::UInt64
+    fn data_type() -> arrow_schema::DataType {
+        arrow_schema::DataType::UInt64
     }
 }
 
 impl arrow_convert::serialize::ArrowSerialize for CustomType {
-    type ArrayBuilderType = arrow::array::UInt64Builder;
+    type ArrayBuilderType = arrow_array::builder::UInt64Builder;
 
     #[inline]
     fn new_array() -> Self::ArrayBuilderType {
@@ -102,14 +102,14 @@ impl arrow_convert::serialize::ArrowSerialize for CustomType {
     }
 
     #[inline]
-    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> arrow::error::Result<()> {
+    fn arrow_serialize(v: &Self, array: &mut Self::ArrayBuilderType) -> Result<(), arrow_schema::ArrowError> {
         array.append_option(Some(v.0));
         Ok(())
     }
 }
 
 impl arrow_convert::deserialize::ArrowDeserialize for CustomType {
-    type ArrayType = arrow::array::UInt64Array;
+    type ArrayType = arrow_array::UInt64Array;
 
     #[inline]
     fn arrow_deserialize(v: Option<u64>) -> Option<Self> {
@@ -217,13 +217,13 @@ fn item2() -> Root {
 }
 
 #[test]
-fn test_round_trip() -> arrow::error::Result<()> {
+fn test_round_trip() -> Result<(), arrow_schema::ArrowError> {
     // serialize to an arrow array
     let original_array = [item1(), item2()];
 
     let array: ArrayRef = original_array.try_into_arrow()?;
 
-    let struct_array = array.as_any().downcast_ref::<arrow::array::StructArray>().unwrap();
+    let struct_array = array.as_any().downcast_ref::<arrow_array::StructArray>().unwrap();
     assert_eq!(struct_array.len(), 2);
 
     let values = struct_array.columns();
