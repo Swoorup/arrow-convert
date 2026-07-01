@@ -84,25 +84,17 @@ pub fn expand_field(input: DeriveEnum) -> TokenStream {
         ..
     } = (&input).into();
 
-    let num_variants = syn::LitInt::new(
-        &format!("{}", variant_types.len()),
-        proc_macro2::Span::call_site(),
-    );
-
     quote! {
         impl arrow_convert::field::ArrowField for #original_name {
             type Type = Self;
 
             fn data_type() -> arrow::datatypes::DataType {
                 arrow::datatypes::DataType::Union(
-                    arrow::datatypes::UnionFields::new(
-                      0..#num_variants, // basically union tag id or here called type_id
-                      vec![
-                          #(
-                              <#variant_types as arrow_convert::field::ArrowField>::field(#variant_names_str),
-                          )*
-                      ]
-                    ),
+                    arrow::datatypes::UnionFields::from_fields(vec![
+                        #(
+                            <#variant_types as arrow_convert::field::ArrowField>::field(#variant_names_str),
+                        )*
+                    ]),
                     #union_type,
                 )
             }
