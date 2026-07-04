@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.12.0...arrow_convert-v0.12.1) - 2026-07-03
+
+### Other
+
+- update Cargo.toml dependencies
+
 ## [0.11.4](https://github.com/Swoorup/arrow-convert/compare/arrow_convert-v0.11.3...arrow_convert-v0.11.4) - 2026-02-10
 
 ### Added
